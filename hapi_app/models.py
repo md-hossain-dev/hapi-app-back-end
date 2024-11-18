@@ -1,9 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import uuid
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    phone_number = models.CharField(max_length=20)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     groups = models.ManyToManyField(
@@ -19,6 +22,85 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+
+
+
+class Follower(models.Model):
+    user = models.ForeignKey(
+        User, 
+        related_name='following', 
+        on_delete=models.CASCADE  # When the user is deleted, their followers are also deleted
+    )
+    followed_user = models.ForeignKey(
+        User, 
+        related_name='followers', 
+        on_delete=models.CASCADE  # When the followed user is deleted, the relationship is removed
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'followed_user')
+
+    def __str__(self):
+        return f'{self.user.username} follows {self.followed_user.username}'
+
+
+
+class UserProfileVisit(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="profile_visit")
+    visit_count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.visit_count} visits"
+
+
+
+
+
+
+class Invitation(models.Model):
+    inviter = models.ForeignKey(User, related_name='sent_invitations', on_delete=models.CASCADE)
+    email = models.EmailField(null=True, blank=True)  
+    phone = models.CharField(max_length=15, null=True, blank=True)  
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  
+    is_accepted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(email__isnull=False) | models.Q(phone__isnull=False),
+                name="email_or_phone_must_be_present"
+            )
+        ]
+
+    def __str__(self):
+        if self.email:
+            return f"Invitation to {self.email} by {self.inviter.username}"
+        return f"Invitation to {self.phone} by {self.inviter.username}"
+
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
+    gold_coins = models.PositiveIntegerField(default=0)
+    diamond_coins = models.PositiveIntegerField(default=0)
+
+    def add_gold_coins(self, amount):
+        self.gold_coins += amount
+        self.save()
+
+    def add_diamond_coins(self, amount):
+        self.diamond_coins += amount
+        self.save()
+
+    def __str__(self):
+        return f"{self.user.username} - Gold: {self.gold_coins}, Diamond: {self.diamond_coins}"
+
+
+
 
 
 class ChatRoom(models.Model):
@@ -70,13 +152,7 @@ class UserGame(models.Model):
         return f'{self.user.username} - {self.game.name} - {self.score}'
 
 
-class Wallet(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
-    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.0)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.user.username} - {self.balance} Coins"
 
 
 class CoinTransaction(models.Model):

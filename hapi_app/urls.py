@@ -1,7 +1,15 @@
-from django.urls import path, include
-
+from django.urls import path
+from .views import CustomObtainTokenView,CustomRegisterUserView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    # path('api/', include('core.urls')),
+    path('login/', CustomObtainTokenView.as_view(), name='login'),
+    path('register/', CustomRegisterUserView.as_view(), name='custom_user_register'),
+    path('follower/<int:user_id>/', FollowUserAPIView.as_view(), name='follow_user'),
+    path('followers-count/<int:user_id>/', UserWithFollowersCountAPIView.as_view(), name='user_with_followers'),
+    path('user/profile-visit/<int:user_id>/', ProfileVisitCountAPIView.as_view(), name='profile-visit'),
+    path('send-invite/<int:inviter_id>/', SendInviteAPIView.as_view(), name='send-invite'),
+    path('accept-invite/', AcceptInviteAPIView.as_view(), name='accept-invite'),
+    path('single-invite-status/', SingleInviteStatusAPIView.as_view(), name='single-invite-status'),
+    path('invite-status/', InviteStatusAPIView.as_view(), name='invite-status'),
+    path('get-coins/', GetCoinsAPIView.as_view(), name='get-coins'),
 ]
