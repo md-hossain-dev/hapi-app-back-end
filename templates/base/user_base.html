@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ad Network{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/non-responsive.css' %}">
+    <script src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+    <script src="https://kit.fontawesome.com/68152c3809.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header class="header" id="navigation-menu">
+        <nav class="navbar max-box-width">
+            <a href="#navigation-menu" class="js-anchor-link"><img class="nav-logo"
+                    src="https://cdn2.unrealengine.com/Diesel%2Fproduct%2Fmagic-leap%2Fhome%2FMagicLeap_IC1_Logo-2295x1130-c18d3c8c07021be889f4bc982aa9c11a905235b5.png?h=270&quality=medium&resize=1&w=480" alt=""></a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#myservices" class="nav-link js-anchor-link">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'about' %}" class="nav-link js-anchor-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contactus" class="nav-link js-anchor-link">Contact</a>
+                </li>
+                {% if not request.user.is_authenticated %}
+                <li class="nav-item">
+                    
+                    <a href="{% url 'login' %}" class="nav-link js-anchor-link custom-btn ">Login</a>
+                    
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'register' %}" class="nav-link js-anchor-link custom-btn">Register</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'dashboard' %}" class="nav-link js-anchor-link custom-btn">Dashboard</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link js-anchor-link custom-btn">Log out</a>
+                </li>
+                {% endif %}
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </nav>
+
+        <script>
+            const hamburger = document.querySelector(".hamburger");
+            const navMenu = document.querySelector(".nav-menu");
+
+            hamburger.addEventListener("click", mobileMenu);
+
+            function mobileMenu() {
+                hamburger.classList.toggle("active");
+                navMenu.classList.toggle("active");
+            }
+            const navLink = document.querySelectorAll(".nav-link");
+
+            navLink.forEach((n) => n.addEventListener("click", closeMenu));
+
+            function closeMenu() {
+                hamburger.classList.remove("active");
+                navMenu.classList.remove("active");
+            }
+
+        </script>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer">
+            <div class="max-box-width ">
+                <div class="grid-footer-container">
+                    <div class="footer-logo container-f">
+                        <div>
+                            <a href="#navigation-menu" class="js-anchor-link"><img class="nav-logo"
+                                    src="https://cdn2.unrealengine.com/Diesel%2Fproduct%2Fmagic-leap%2Fhome%2FMagicLeap_IC1_Logo-2295x1130-c18d3c8c07021be889f4bc982aa9c11a905235b5.png?h=270&quality=medium&resize=1&w=480" alt=""></a>
+                        </div>
+                        <p>Monetization solution for website and application to boost your revenue and ad formats, our
+                            unique selling point lies in our ability to provide customized and personalized ad
+                            strategies for each publisher.</p>
+                    </div>
+
+                    <div class="footer-box container-f">
+                        <h3>Get In Touch</h3>
+
+                        <div class="footer-link-box">
+                            <p><a href="{% url 'tearms_and_conditon' %}">stationary</a></p>
+                            <p><a href="">Static vs Dynamic</a></p>
+                            <p><a href="">Dictionary</a></p>
+                            <p><a href="">stationary</a></p>
+                            <p><a href="">Static vs Dynamic</a></p>
+                            <p><a href="">Dictionary</a></p>
+                        </div>
+                    </div>
+                    <div class="footer-box container-f">
+                        <h3>Get In Touch</h3>
+
+                        <div class="footer-link-box">
+                            <p><a href=""><i style="padding-right: 5px;" class="fa-brands fa-whatsapp fa-bounce"></i>
+                                    +02342432423</a></p>
+                            <p><a href=""><i style="padding-right: 5px;"
+                                        class="fa-sharp fa-solid fa-location-dot fa-beat"></i> Mirpur</a></p>
+                            <p><a href=""><i style="padding-right: 5px;" class="fa-regular fa-envelope fa-bounce"></i>
+                                    web@web.com</a></p>
+                        </div>
+                    </div>
+                    <div class="footer-box container-f">
+                        <h2>Start your Monetization!!</h2>
+                        <a href="">
+                            <button class="custom-des-btn">
+                                <span>
+                                    Monetization Now
+                                </span>
+                            </button>
+                        </a>
+                        <h4>Follow us on</h4>
+                        <div class="flex-links-ico">
+                            <div>
+                                <a href="">
+                                    <i class="fa-brands fa-twitter"></i>
+                                </a>
+                            </div>
+                            <div>
+                                <a href="">
+                                    <i class="fa-brands fa-instagram"></i>
+                                </a>
+                            </div>
+                            <div>
+                                <a href="">
+                                    <i class="fa-brands fa-facebook"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>Copyright ©  2024. All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+
+</html>

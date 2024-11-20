@@ -1,0 +1,138 @@
+{% extends "base/admin_base.html" %}
+{% load static %}
+
+
+{% block title %} Dashboard {% endblock title %}
+
+
+{% block content %}
+<section class="content">
+    <div class="page-heading">
+        <h1>Dashboard</h1>
+        <p> Friday · May 24, 2024 · 12:31:27 AM GMT+5</p>
+    </div>
+
+    <div class="welcome-box">
+        <h1>Welcome back to your dashboard, Announcement !!</h1>
+        <p>That Mix2ads cpm option is exceptional, with impressive fill rates and high performance, also ad formats
+            are incredible the working with header bidding tags and video ads, cpm & cpa model also.</p>
+        <p>Let's boost up revenue</p>
+    </div>
+
+    <div class="card-grid-container">
+        <div class="card-1 card">
+            <div>
+                <p>Impressions ( Yesterday )</p>
+                <b>0</b>
+                <p><i style="color: green; padding-right: 10px;" class="fa-solid fa-chart-line"></i> pIncreases Up
+                </p>
+
+            </div>
+            <div>
+                <i style="font-size: 40px;" class="fa-solid fa-eye"></i>
+            </div>
+        </div>
+        <div class="card-2 card">
+            <div>
+                <p>Clicks ( Yesterday ) </p>
+                <b>0</b>
+                <p><i style="color: green; padding-right: 10px;" class="fa-solid fa-chart-line"></i> pIncreases Up
+                </p>
+
+            </div>
+            <div>
+                <i style="font-size: 40px;" class="fa-solid fa-arrow-pointer"></i>
+            </div>
+        </div>
+        <div class="card-3 card">
+            <div>
+                <p>CPM ( Yesterday )</p>
+                <b>0</b>
+                <p><i style="color: green; padding-right: 10px;" class="fa-solid fa-chart-line"></i> pIncreases Up
+                </p>
+
+            </div>
+            <div>
+                <i style="font-size: 40px;" class="fa-solid fa-percent"></i>
+            </div>
+        </div>
+        <div class="card-4 card">
+            <div>
+                <p>Earnings ( Yesterday )</p>
+                <b>0</b>
+                <p><i style="color: green; padding-right: 10px;" class="fa-solid fa-chart-line"></i> pIncreases Up
+                </p>
+
+            </div>
+            <div>
+                <i style="font-size: 40px;" class="fa-solid fa-comments-dollar"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="table-and-ques">
+        <div>
+            <div class="static-table-heading">
+                <h3>$ Revenue Statics</h3>
+                <p>Report is Generated Daily - 9PM IST</p>
+            </div>
+
+            <div class="flex-table-and-content">
+                <div class="flex-child-1">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Impression</th>
+                                <th>Clicks</th>
+                                <th>ECMP</th>
+                                <th>Earnings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Data 1</td>
+                                <td>Data 2</td>
+                                <td>Data 3</td>
+                                <td>Data 4</td>
+                                <td>Data 4</td>
+                            </tr>
+                            <tr>
+                                <td>Data 5</td>
+                                <td>Data 6</td>
+                                <td>Data 7</td>
+                                <td>Data 8</td>
+                                <td>Data 8</td>
+                            </tr>
+                            <tr>
+                                <td>Data 9</td>
+                                <td>Data 10</td>
+                                <td>Data 11</td>
+                                <td>Data 12</td>
+                                <td>Data 12</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex-child-2">
+                    <h1>What is Header Bidding?</h1>
+                    <p>Header Bidding serves as a demand partner for Google, enabling you to display ads from over 30 other ad networks on your website, thereby increasing your revenue.</p>
+                    <span>Contact our team</span>
+                </div>
+            </div>
+        </div>
+        <div>
+
+        </div>
+    </div>
+</section>
+
+
+<script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+{% endblock content %}
+
+

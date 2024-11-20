@@ -102,6 +102,17 @@ class Wallet(models.Model):
 
 
 
+class Image(models.Model):
+    user = models.ForeignKey(User, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='user_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"Image {self.id} uploaded by {self.user.username}"
+
+
+
 
 class ChatRoom(models.Model):
     name = models.CharField(max_length=100)

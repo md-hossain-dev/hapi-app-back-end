@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ad Network{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/admin_css/dasboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/admin-dash-global.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/domain_and_app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/help_center.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/payment.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/referal_system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/report.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_css/user_dropdown.css' %}">
+
+    <script src="{% static 'css/admin_css/admin_dash/dashboard.js' %}"></script>
+    
+
+    <script src="https://kit.fontawesome.com/68152c3809.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="topnav">
+        <div class="nav-left">
+            <div class="icon-and-log">
+                <span class="icon" onclick="toggleNav()"></span>
+                <img src="https://images.ctfassets.net/xz1dnu24egyd/2Ix8kvOZiPx3ZX9L3mb5Vy/99a2f84c5f82e86cf8c397f4f7ce6535/gitlab-logo-400.png"
+                    alt="Logo" class="logo">
+            </div>
+
+            <div>
+                <div class="action">
+                    <div class="profile" onclick="menuToggle();">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNR7FvvC_9X1l2xqi2rdkStAHaSRMmg89O_g&s"
+                            alt="Profile">
+                    </div>
+                    <div class="menu">
+
+                        <h3>{{user.first_name}}&nbsp;{{user.last_name}}</h3>
+                        <ul>
+                            <!-- <li class="user-single-info"><i style="color: black; padding-right: 7px; font-size: 14px;"
+                                    class="fa-solid fa-gear"></i><a href="#">My Profile</a></li> -->
+                            <li class="user-single-info"><i style="color: black; padding-right: 7px; font-size: 14px;"
+                                    class="fa-solid fa-arrow-right-from-bracket"></i><a href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <div id="mySidenav" class="sidenav">
+        <a href="{% url 'dashboard' %}"><i style="padding-right: 8px;" class="fa-solid fa-gauge"></i> Dashboard</a>
+        <div class="links-box">
+            <h2>NECESSARY</h2>
+            <a href="{% url 'reports' %}"><i style="padding-right: 8px;" class="fa-solid fa-circle-half-stroke"></i> Reports</a>
+            <a href="{% url 'payments' %}"><i style="padding-right: 8px;" class="fa-solid fa-coins"></i> Payment</a>
+        </div>
+        <div class="links-box">
+            <h2>SOURCE OR REVENUE</h2>
+            <a href="{% url 'referral_system' %}"><i style="padding-right: 8px;" class="fa-brands fa-connectdevelop"></i>  Referral System</a>
+            <a href="{% url 'domain_apps' %}"><i style="padding-right: 8px;" class="fa-solid fa-earth-africa"></i>  Domain & Apps</a>
+        </div>
+        <div class="links-box">
+            <h2>SUPPORT</h2>
+            <a href="{% url 'help_center' %}"><i style="padding-right: 8px;" class="fa-brands fa-hire-a-helper"></i>  Help Center</a>
+        </div>
+    </div>
+
+    <script>
+        function menuToggle() {
+            let menu = document.querySelector('.menu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function (event) {
+            let profile = document.querySelector('.profile');
+            let menu = document.querySelector('.menu');
+
+            // Check if the click was outside the menu and profile elements
+            if (!profile.contains(event.target) && !menu.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+
+    <main>
+        {% block content %}
+
+        {% endblock %}
+    </main>
+
+
+</body>
+
+</html>

@@ -1,0 +1,157 @@
+.footer {
+    background-color: black;
+    padding: 60px;
+    color: white;
+}
+
+
+
+.footer-logo p {
+    margin-top: 20px;
+    color: white;
+}
+
+.footer-box h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+
+.footer-link-box p a {
+    color: white;
+    line-height: 32px;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+
+
+.footer-box h2 {
+    font-size: 30px;
+    color: #fff;
+    line-height: 38px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+}
+
+.footer-box h4 {
+
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 20px;
+    display: block;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.flex-links-ico div a {
+    color: #003aff;
+    font-size: 14px;
+}
+
+.flex-links-ico a {
+    height: 40px;
+    width: 40px;
+    background: white;
+    display: block;
+    text-align: center;
+    line-height: 40px;
+    font-size: 22px;
+    border-radius: 50%;
+    color: #003aff;
+    transition: all 0.3s;
+}
+
+.flex-links-ico {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+
+.copyright {
+    background-color: rgb(29, 27, 27);
+    padding: 25px;
+}
+
+.copyright p {
+    text-align: center;
+    color: white;
+    font-weight: 500;
+}
+
+@media (min-width: 320px) and (max-width: 575px) {
+    .container-f {
+        margin-bottom: 45px;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .container-f {
+        margin-bottom: 45px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+
+    .grid-footer-container {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 20px;
+    }
+
+    .container-f {
+        margin-bottom: 25px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .grid-footer-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .max-box-width {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .grid-footer-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1400px) and (max-width: 1599px) {
+    .max-box-width {
+        max-width: 1320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .grid-footer-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1600px) and (max-width: 5599px) {
+    .max-box-width {
+        max-width: 1320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .grid-footer-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}

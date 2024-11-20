@@ -1,0 +1,344 @@
+.bg-section {
+  background-color: black !important;
+  border-bottom-left-radius: 100px;
+  border-bottom-right-radius: 100px;
+  color: white;
+
+}
+
+.box-padding {
+  padding: 1rem 1.5rem;
+}
+
+.center {
+  padding: 80px 0;
+}
+
+
+.heading-content h2 span {
+  position: relative;
+
+
+}
+
+.heading-content h2 span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -14px;
+  width: 100%;
+  height: 20px;
+  background: url(https://mix2ads.com/public/new-assets/images/blue-line.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+
+
+
+
+
+
+
+.custom-des-btn {
+  padding: 10px 40px;
+  border: none;
+  outline: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 1;
+  position: relative;
+  border: 1px solid white;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: black;
+  color: white;
+}
+
+.custom-des-btn>span {
+  z-index: 2;
+}
+
+.custom-des-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px;
+  background-color: white;
+  z-index: -1;
+  overflow: hidden;
+  -webkit-transform: scaleX(0);
+  -ms-transform: scaleX(0);
+  transform: scaleX(0);
+  -webkit-transform-origin: left;
+  -ms-transform-origin: left;
+  transform-origin: left;
+  -webkit-transition: -webkit-transform 0.2s ease-in;
+  transition: -webkit-transform 0.2s ease-in;
+  transition: transform 0.2s ease-in;
+
+}
+
+.custom-des-btn:hover {
+  color: black;
+}
+
+.custom-des-btn:hover::before {
+  -webkit-transform: scaleX(1);
+  -ms-transform: scaleX(1);
+  transform: scaleX(1);
+  -webkit-transform-origin: left;
+  -ms-transform-origin: left;
+  transform-origin: left;
+}
+
+.card {
+  /* background-color: white; */
+  padding: 25px 20px;
+  border-radius: 0.375em;
+  border-radius: 0.375em;
+  -webkit-box-shadow: 0px 20px 80px rgba(0, 148, 255, .05);
+  box-shadow: 0px 20px 80px rgba(0, 148, 255, .05);
+  margin-bottom: 22px;
+  background-image: linear-gradient(to bottom, rgba(3, 3, 3, 0.85), rgba(3, 3, 3, 0.85)), url(https://www.crushpixel.com/big-static13/preview4/violet-black-waves-modern-futuristic-1145184.jpg);
+  color: white !important;
+}
+
+.card img {
+  width: 40px;
+}
+
+
+
+.card p {
+  margin-top: 20px;
+  /* color: #666; */
+  font-size: 14px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.flex-card-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+.pulish-list {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  /* background: black; */
+  background-image: url("https://t3.ftcdn.net/jpg/04/22/08/36/360_F_422083634_hfVZr5ktn0pxZSU8q400TVkwgNgMeKDC.jpg");
+  padding: 10px 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  margin-top: 14px;
+  margin-bottom: 0;
+  border-radius: 12px;
+  color: white !important;
+}
+
+.pulish-list img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* .pulish-list p {
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
+} */
+
+.container-pragraph {
+  color: #666;
+  font-size: 16px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+
+
+
+.single-box {
+  flex: 0 0 auto;
+  color: white;
+  /* background: black; */
+  background-image: url("https://t3.ftcdn.net/jpg/04/22/08/36/360_F_422083634_hfVZr5ktn0pxZSU8q400TVkwgNgMeKDC.jpg");
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.single-box img {
+  width: 44px;
+}
+
+.single-box h3 {
+  font-size: 19px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.single-box p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  margin-bottom: 5px;
+}
+
+
+.content-side-img {
+  object-fit: contain;
+  width: 100%;
+}
+
+.money-back {
+  background: #fff;
+  border-radius: 30px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.12);
+  border: 1px solid black;
+  padding: 50px 20px;
+  margin-top: 80px;
+  background-image: linear-gradient(to bottom, rgba(3, 3, 3, 0.85), rgba(3, 3, 3, 0.85)), url(https://www.jootoor.com/wp-content/uploads/2023/09/BLACK-GRADIENTS.jpg);
+}
+
+.money-back h3 {
+  font-size: 30px;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.money-back p {
+  font-size: 16px;
+  color: white;
+  text-align: center;
+}
+
+.custom-p {
+  background-color: white;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px;
+  border: 1px solid white;
+  color: black !important;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.custom-m-box {
+  margin-top: 20px;
+  align-items: center;
+}
+
+.full-bg-red {
+  margin-top: 80px;
+  background-image: linear-gradient(to bottom, rgba(3, 3, 3, 0.85), rgba(3, 3, 3, 0.85)), url(https://png.pngtree.com/thumb_back/fh260/background/20230421/pngtree-abstract-blue-background-free-download-wallpaper-hd-vector-image_2479232.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.full-bg-red .unique-cls {
+  color: orange;
+  font-size: 16px;
+  margin-bottom: 10px;
+  display: block;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.flex-fullbg-continer {
+
+  padding-top: 60px;
+  padding-bottom: 60px;
+
+}
+
+
+.flex-numbers {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.grid-fullbg-child-container h2 {
+  font-size: 30px;
+  color: white;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.grid-fullbg-child-container p {
+  font-size: 16px;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.number-box {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.number-box h2 {
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
+.Publisher {
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  margin-top: 40px;
+}
+
+.parent-cards {
+  padding: 70px;
+}
+
+.single-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  /* box-shadow: rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px, rgba(17, 17, 26, 0.1) 0px 24px 80px; */
+  box-shadow: rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px, rgba(0, 0, 0, 0.07) 0px 16px 32px, rgba(0, 0, 0, 0.07) 0px 32px 64px;
+  height: 100px;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.single-card img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.heading-inside-content {
+  color: white !important;
+}
+
+.like-underine {
+  color: #1B79E8;
+}
+
+.heading-inside-pragraph {
+  font-size: 16px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  font-weight: 600;
+  color: #ffb90b;
+  line-height: 1.7;
+}

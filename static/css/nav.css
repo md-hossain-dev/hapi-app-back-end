@@ -1,0 +1,207 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+
+}
+
+/* li::marker {
+    color: red;
+} */
+
+.navbar li {
+    list-style: none;
+}
+
+
+.navbar a {
+    text-decoration: none;
+}
+
+.header {
+    background-image: linear-gradient(to bottom, rgba(3, 3, 3, 0.85), rgba(3, 3, 3, 0.85)), url(https://www.jootoor.com/wp-content/uploads/2023/09/BLACK-GRADIENTS.jpg);
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+
+}
+
+.hamburger {
+    display: none;
+}
+
+.bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    background-color: white;
+}
+
+.nav-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    margin-left: 3rem;
+}
+
+.nav-link {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+}
+
+.nav-link:hover {
+    color: gray;
+}
+
+.nav-logo {
+    width: 100px;
+}
+
+.custom-btn {
+    border: 1px solid white;
+    padding: 10px 25px;
+    border-radius: 40px;
+}
+
+.custom-btn:hover {
+    background-color: white;
+    color: black;
+}
+
+
+/* for multiple pages */
+
+
+.mutli-page-clr {
+    background-color: black !important;
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+    color: white;
+}
+
+.about-us-title h1 {
+    padding: 60px;
+    text-align: center;
+    margin-bottom: 60px;
+    font-size: 28px;
+}
+
+.pyy-40 {
+    margin-bottom: 60px;
+}
+
+.s-content p{
+    font-size: 16px !important;
+    line-height: 1.7;
+    margin-bottom: 30px;
+    font-weight: 600;
+    color: rgb(71, 69, 69);
+}
+
+.s-content h6 {
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #1B79E8;
+}
+
+a {
+    color: green;
+    text-decoration: none;
+}
+
+/* end here  */
+
+@media only screen and (max-width: 900px) {
+    .nav-menu {
+        display: block;
+        position: fixed;
+        left: -100%;
+        top: 5rem;
+        flex-direction: column;
+        background-color: #202020;
+        width: 100%;
+        border-radius: 10px;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        left: 0%;
+    }
+
+    .nav-item {
+        margin: 2.5rem 0;
+    }
+
+    .hamburger {
+        display: block;
+        cursor: pointer;
+    }
+
+    .hamburger.active .bar:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .hamburger.active .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+}
+
+
+
+
+@media (min-width: 320px) and (max-width: 575px) {}
+
+@media (min-width: 576px) and (max-width: 767px) {}
+
+@media (min-width: 768px) and (max-width: 991px) {}
+
+@media (min-width: 992px) and (max-width: 1199px) {}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .max-box-width {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 1400px) and (max-width: 1599px) {
+    .max-box-width {
+        max-width: 1320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 1600px) and (max-width: 5599px) {
+    .max-box-width {
+        max-width: 1320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+}

@@ -1,0 +1,112 @@
+{% load static %}
+
+
+<!-- External CSS -->
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css'>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{% static 'css/login/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/login/responsive.css' %}">
+
+<main>
+    <section>
+        <div class="top_img">
+            <img src="{% static 'css/images/images.png' %}" alt="Image" />
+        </div>
+        <div class="login_box">
+            <h4 class="log_in_to_title">Log in to account</h4>
+            <p class="mail_pass_title">Enter your email & password to login</p>
+
+            <!-- Display messages -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="Login_Box_main">
+                <form method="POST" id="form-container">
+                    {% csrf_token %}
+                    <div class="Login_Box_input">
+                        <div class="Login_Box_add-form">
+                            <label for="email">Email Address</label><br />
+                            <input class="login_input_box" type="email" id="id_email_address" name="username" placeholder="Enter Your Email" required />
+                        </div>
+                        <div class="Login_Box_add-form">
+                            <label for="password">Password</label><br />
+                            <input class="login_input_box" type="password" id="id_password" name="password" placeholder="Enter your password ***" required />
+                        </div>
+                    </div>
+
+                    <div class="login_checkbox">
+                        <label class="cl-checkbox">
+                            <input type="checkbox" checked>
+                            <span></span>
+                        </label>
+                        <div class="remember_me">Remember me</div>
+                    </div>
+                    <div class="forget_passwords">
+                        <a href="{% url 'forget' %}">Forgot password?</a>
+                    </div>
+
+                    <div class="sign_in_btn">
+                        <button class="p_button" type="submit">Sign in</button>
+                    </div>
+
+                    <div class="details_support">
+                        <p class="our_customer">Our Customer Support</p>
+                        <div class="number_and_support">
+                            <div class="call_numbers">(800) 587-2319</div>
+                            <div class="admin_support">support@admin.com</div>
+                        </div>
+                    </div>
+
+                    <div class="have_account">
+                        <p class="have_account_details">Don't have an account? <span><a class="create_account" href="{% url 'register' %}">Create Account</a></span></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script type="text/javascript">
+    localStorage.clear();
+      
+    const form = document.getElementById("form-container");
+    const time = new Date();
+    const allTime = time.getTime();
+    const timeToken = 3600000; // 1 hour in milliseconds
+
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const email = form["id_email_address"].value;
+        const password = form["id_password"].value;
+
+        const dataLogin = {
+            email,
+            password
+        };
+        const postBody = JSON.stringify(dataLogin);
+
+        fetch("/token/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: postBody
+        }).then((response) => response.json()).then((data) => {
+            localStorage.setItem("jwtToken", data.access);
+            localStorage.setItem("refreshToken", data.refresh);
+            localStorage.setItem("timeToken", allTime + timeToken);
+            form.submit();
+        }).catch(err => {
+            form.submit();
+        });
+    });
+</script>

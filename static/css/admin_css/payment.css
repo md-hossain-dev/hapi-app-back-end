@@ -1,0 +1,111 @@
+.payment-card {
+    background-image: linear-gradient(to left, #0a141d, #0f1a21, #142026, #1a262a, #202c2e);
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-radius: 6px;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.payment-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-card p {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+.static-heading-payment-page {
+    border: 1px solid white;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 6px;
+    background-color: white;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.static-heading-payment-page h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: rgb(0, 97, 242);
+}
+
+.add-payment-btn {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: black;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.payment-method-card {
+    border: 1px solid white;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 30px;
+    padding-top: 30px;
+    border-radius: 6px;
+    background-color: white;
+    margin-bottom: 40px;
+}
+
+
+
+@media (min-width: 320px) and (max-width: 575px) {}
+
+@media (min-width: 576px) and (max-width: 767px) {}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .paymnet-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .paymnet-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .paymnet-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1400px) and (max-width: 1599px) {
+    .paymnet-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1600px) and (max-width: 5599px) {
+    .paymnet-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}

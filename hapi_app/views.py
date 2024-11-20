@@ -9,9 +9,13 @@ from django.core.exceptions import ValidationError
 import re
 from django.core.mail import send_mail
 import uuid
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from .serializers import ImageSerializer
 
 
 class CustomObtainTokenView(APIView):
+    permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
        
@@ -420,3 +424,74 @@ class GetCoinsAPIView(APIView):
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         except Wallet.DoesNotExist:
             return Response({'message': 'Wallet not found for the user'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+class UploadMultipleImagesAPIView(APIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]  
+
+    def post(self, request, *args, **kwargs):
+        user_id = kwargs.get('user_id')
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        images = request.FILES.getlist('image')
+        print('request.FILES',request.FILES)
+        # print('images',images)
+        if not images:
+            return Response({'message': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        uploaded_images = []
+        for image in images:
+            image_instance = Image(user=user, image=image)
+            image_instance.save()
+            uploaded_images.append({
+                'id': image_instance.id,
+                'image_url': image_instance.image.url
+            })
+
+        return Response({
+            'message': 'Images uploaded successfully',
+            'images': uploaded_images
+        }, status=status.HTTP_201_CREATED)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+.modal-container {
+    margin-bottom: 40px;
+}
+
+.ref-form {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    text-decoration: none;
+    background-color: black;
+    color: white;
+    font-size: 600;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+

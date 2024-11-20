@@ -1,0 +1,48 @@
+@media (min-width: 200px) and (max-width: 319px) {
+    .register-container-content {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    .country_code_number{
+        grid-template-columns: repeat(1, 1fr);
+        align-items: end;
+    }
+
+    .regi_number_and_support{
+        flex-direction: column;
+    }
+
+}
+@media (min-width: 320px) and (max-width: 575px) {
+    .register-container-content {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    .country_code_number{
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    
+    .regi_number_and_support{
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .register-container-content {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+
+    .country_code_number{
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    
+    .regi_number_and_support{
+        flex-direction: column;
+    }
+}

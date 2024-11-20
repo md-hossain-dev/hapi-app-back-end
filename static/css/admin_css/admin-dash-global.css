@@ -1,0 +1,384 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-image: linear-gradient(to left, #dfe0db, #d6dbd8, #cfd6d6, #cbd0d4, #c9cacf);
+    
+}
+
+/* The top navigation bar */
+.topnav {
+    overflow: hidden;
+    background-color: #1F2937;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 2;
+    justify-content: space-between;
+}
+
+/* The logo inside the topnav */
+.topnav .logo {
+    height: 40px;
+}
+
+/* The right section of the topnav */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Notification icon */
+.notification {
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+    margin-right: 20px;
+}
+
+/* User menu */
+.user-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-avatar {
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* User dropdown */
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    padding: 12px 16px;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.user-dropdown p {
+    margin: 8px 0;
+}
+
+.user-dropdown button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.user-dropdown button:hover {
+    background-color: #555;
+}
+
+/* The icon inside the topnav */
+.topnav {
+    font-size: 25px;
+    cursor: pointer;
+    color: white;
+    display: inline-block;
+    position: sticky;
+    padding: 0 15px;
+}
+
+
+
+.topnav .icon::before {
+    content: "\2630";
+    /* Unicode for the hamburger menu */
+    display: block;
+}
+
+.topnav .icon.close::before {
+    content: "\2715";
+    /* Unicode for the close icon */
+}
+
+/* The side navigation menu */
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    left: 0;
+    /* background-color: #111; */
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 80px;
+    background-color: #111827;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+/* The navigation menu links */
+.sidenav a {
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    color: whitesmoke;
+    display: block;
+    transition: 0.3s;
+    font-weight: 700;
+
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.sidenav a:hover {
+    background-color: #1F2937;
+    color: white;
+}
+
+
+
+
+/* The close button */
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* Media query for devices with width less than 600px */
+@media screen and (max-width: 600px) {
+    .topnav {
+        height: 70px;
+        padding: 0 10px;
+    }
+
+    .topnav .logo {
+        height: 30px;
+    }
+
+    .topnav .icon {
+        font-size: 24px;
+        padding: 0 10px;
+    }
+
+    .sidenav a {
+        font-size: 20px;
+        padding: 8px 8px 8px 20px;
+    }
+
+    .sidenav .closebtn {
+        font-size: 30px;
+        right: 15px;
+        margin-left: 30px;
+    }
+}
+
+/* Content section */
+.content {
+    /* margin-top: 50px; */
+    /* Adjust according to the height of your topnav */
+    padding: 20px;
+    transition: margin-left 0.5s;
+    /* Add transition for smooth movement */
+}
+
+/* Adjust content position when side navigation is open */
+.sidenav-open .content {
+    margin-left: 250px;
+    /* Adjust based on the width of your side navigation */
+}
+
+.nav-left {
+    display: flex;
+    /* align-items: center; */
+    justify-content: space-between;
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-drop {
+    font-family: 'Ubuntu', sans-serif;
+    color: #444;
+}
+
+.notification-drop .item {
+    padding: 10px;
+    font-size: 18px;
+    position: relative;
+    border-bottom: 1px solid #ddd;
+}
+
+.notification-drop .item:hover {
+    cursor: pointer;
+}
+
+.notification-drop .item i {
+    margin-left: 10px;
+}
+
+.notification-drop .item ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    background: #fff;
+    left: -200px;
+    right: 0;
+    z-index: 1;
+    border-top: 1px solid #ddd;
+}
+
+.notification-drop .item ul li {
+    font-size: 16px;
+    padding: 15px 0 15px 25px;
+}
+
+.notification-drop .item ul li:hover {
+    background: #ddd;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+@media screen and (min-width: 500px) {
+    .notification-drop {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .notification-drop .item {
+        border: none;
+    }
+}
+
+
+.full-width-box {
+    position: relative;
+
+    /* Specify the height you want */
+    background: linear-gradient(135deg, #2c2c2c 25%, transparent 25%) -50px 0,
+        linear-gradient(225deg, #2c2c2c 25%, transparent 25%) -50px 0,
+        linear-gradient(315deg, #2c2c2c 25%, transparent 25%),
+        linear-gradient(45deg, #2c2c2c 25%, transparent 25%);
+    background-size: 100px 100px;
+    background-color: #1a1a1a;
+    /* Fallback color */
+    padding: 20px;
+    /* Adds some padding inside the box */
+    box-sizing: border-box;
+    /* Includes padding and border in the element's total width and height */
+    overflow: hidden;
+    /* Ensure the content doesn't overflow */
+    color: white;
+    /* Light text for readability */
+    border-radius: 5px;
+    padding: 40px;
+}
+
+.full-width-box-card {
+    position: relative;
+
+    /* Specify the height you want */
+    background-image: linear-gradient(to left, #0d3f92, #004789, #004a79, #004b66, #134a55);
+
+    /* Fallback color */
+    padding: 20px;
+    /* Adds some padding inside the box */
+    box-sizing: border-box;
+    /* Includes padding and border in the element's total width and height */
+    overflow: hidden;
+    /* Ensure the content doesn't overflow */
+    color: white;
+    /* Light text for readability */
+    border-radius: 5px;
+    padding: 40px;
+}
+
+.box-title {
+    margin: 0;
+    padding-bottom: 20px;
+    font-size: 24px;
+    z-index: 1;
+    /* Ensure the title appears above the background */
+    position: relative;
+    color: rgb(0, 97, 242);
+
+}
+
+.box-content {
+    margin: 0;
+    font-size: 16px;
+    z-index: 1;
+    /* Ensure the content appears above the background */
+    position: relative;
+}
+
+.cards-grid-container {
+    display: grid;
+    /* grid-template-columns: repeat(4, 1fr); */
+    margin-top: 40px;
+    gap: 40px;
+}
+
+
+.icon-and-log {
+    display: flex;
+    align-items: center;
+
+}
+
+
+.links-box h2 {
+    font-size: 500;
+    font-size: 11px;
+    color: gray;
+    padding-left: 15px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-left: 10px;
+}
+
+
+@media (min-width: 320px) and (max-width: 575px) {}
+
+@media (min-width: 576px) and (max-width: 767px) {}
+
+@media (min-width: 768px) and (max-width: 991px) {}
+
+@media (min-width: 992px) and (max-width: 1199px) {}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    
+}
+
+@media (min-width: 1400px) and (max-width: 1599px) {
+    .content {
+        width: 1320px;
+        margin: 0 auto;
+    }
+
+}
+
+@media (min-width: 1600px) and (max-width: 5599px) {
+    .content {
+        width: 1320px;
+        margin: 0 auto;
+    }
+}
