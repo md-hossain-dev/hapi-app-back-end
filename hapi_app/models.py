@@ -96,9 +96,27 @@ class Wallet(models.Model):
         self.diamond_coins += amount
         self.save()
 
+    def deduct_coins(self, amount):
+        if self.gold_coins >= amount:
+            self.gold_coins -= amount
+            self.save()
+            return True
+        return False
+
     def __str__(self):
         return f"{self.user.username} - Gold: {self.gold_coins}, Diamond: {self.diamond_coins}"
 
+
+
+class WalletLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wallet_logs')
+    coins_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    action = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    wallet_description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Payment {self.user.username} - {self.action}"
 
 
 

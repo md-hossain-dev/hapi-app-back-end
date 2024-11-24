@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +40,8 @@ INSTALLED_APPS = [
 
 
     'hapi_app',
+    'store',
+    'c_p',
     'app_admin',
     'rest_framework',
     'rest_framework.authtoken',
@@ -70,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'userauthentication.context_processors.js_timestamp',
+                
 
             ],
         },

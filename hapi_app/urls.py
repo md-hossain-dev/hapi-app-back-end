@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomObtainTokenView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
+from .views import CustomObtainTokenView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
 
 urlpatterns = [
     path('login/', CustomObtainTokenView.as_view(), name='login'),
@@ -13,4 +13,5 @@ urlpatterns = [
     path('invite-status/', InviteStatusAPIView.as_view(), name='invite-status'),
     path('get-coins/', GetCoinsAPIView.as_view(), name='get-coins'),
     path('upload-images/<int:user_id>/', UploadMultipleImagesAPIView.as_view(), name='upload-multiple-images'),
+    path('create-wallet/', CreateOrUpdateWalletAPIView.as_view(), name='create_wallet'),
 ]
