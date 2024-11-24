@@ -19,11 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
-    path('grappelli/', include('grappelli.urls')), 
+urlpatterns = [ 
     path('admin/', admin.site.urls),
     path('api/', include('hapi_app.urls')),
     path('', include('app_admin.urls')),
+    path('api/', include('store.urls')),
+    path('api/', include('c_p.urls')),
 
 ]
 if settings.DEBUG:

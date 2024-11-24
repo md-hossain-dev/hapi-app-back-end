@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
-from .serializers import ImageSerializer
+from .serializers import ImageSerializer,WalletSerializer
 
 
 class CustomObtainTokenView(APIView):
@@ -51,6 +51,7 @@ class CustomObtainTokenView(APIView):
 
 
 class CustomRegisterUserView(APIView):
+    permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -463,7 +464,32 @@ class UploadMultipleImagesAPIView(APIView):
 
 
 
+class CreateOrUpdateWalletAPIView(APIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
 
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get('user')
+        gold_coins = int(request.data.get('gold_coins', 0))
+
+        wallet = Wallet.objects.filter(user_id=user_id).first()
+
+        if wallet:
+            wallet.gold_coins += gold_coins
+            wallet.save()
+            serializer = WalletSerializer(wallet)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            wallet_data = {
+                'user': user_id,
+                'gold_coins': gold_coins,
+            }
+            serializer = WalletSerializer(data=wallet_data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
