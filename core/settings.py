@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'hapi_app',
     'store',
     'c_p',
+    'family',
     'app_admin',
     'rest_framework',
     'rest_framework.authtoken',

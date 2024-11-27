@@ -2,12 +2,37 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
 
+class UserLV(models.Model):
+    level_name = models.CharField(max_length=20, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.level_name
+
+
+
+class Country(models.Model):
+    name = models.CharField(max_length=54, unique=True)
+    short_code = models.CharField(max_length=20, unique=True)
+    county_flag = models.ImageField(upload_to='county_flag/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+
 class User(AbstractUser):
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    profile = models.ImageField(upload_to='profile/', blank=True, null=True)
+    cover_photo = models.ImageField(upload_to='cover_photo/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_svip = models.BooleanField(default=False)
+    # country = models.CharField(max_length=100, blank=True, null=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE,null=True,blank=True)
+    level = models.ForeignKey(UserLV, related_name='level', on_delete=models.CASCADE,null=True,blank=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
