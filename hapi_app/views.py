@@ -11,27 +11,31 @@ from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
-from .serializers import ImageSerializer,WalletSerializer
+from .serializers import ImageSerializer,WalletSerializer,CountrySerializer,UserUpdateSerializer,UserUpdateImageSerializer
+from django.shortcuts import get_object_or_404
 
 
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
-       
         username = request.data.get('username')
         password = request.data.get('password')
+        fcm_token = request.data.get('fcm_token') 
 
         if not username or not password:
             return Response({
                 'message': 'Username and password are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-       
         user = authenticate(request, username=username, password=password)
         
         if user is not None and user.is_active:
-            
+            # FCM Token save
+            if fcm_token:
+                user.fcm_token = fcm_token
+                user.save()
+
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
@@ -494,22 +498,91 @@ class CreateOrUpdateWalletAPIView(APIView):
 
 
 
+class CountryListAPIView(APIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        countries = Country.objects.all()
+        serializer = CountrySerializer(countries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
 
 
+class UserUpdateAPIView(APIView):
+    # permission_classes = [IsAuthenticated]  
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user') 
+        if not user_id:
+            return Response({
+                'message': 'User ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserUpdateImageSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({
+                'message': 'User ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+
+        # Custom validation for fields
+        nick_name = request.data.get('nick_name')
+        if nick_name and len(nick_name) < 3:
+            return Response({
+                'message': 'Nick name must be at least 3 characters long.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        bio = request.data.get('bio')
+        gender = request.data.get('gender')
+        country = request.data.get('country')
+        birthday = request.data.get('birthday')
 
 
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'User information updated successfully',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response({
+            'message': 'Invalid data',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserProfileImageUpdateAPIView(APIView):
+    permission_classes = [AllowAny]
 
+    def put(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')  
+        user = get_object_or_404(User, id=user_id)
+        
+        profile_image = request.FILES.get('profile')
 
+        if not profile_image:
+            return Response({
+                'message': 'Profile image is required.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        user.profile = profile_image
+        user.save()
 
-
-
-
+        return Response({
+            'message': 'Profile image updated successfully',
+            'profile_url': user.profile.url if user.profile else None
+        }, status=status.HTTP_200_OK)
 
 
 

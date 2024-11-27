@@ -23,14 +23,22 @@ class Country(models.Model):
 
 
 class User(AbstractUser):
+    GENDER_CHOICES = (
+        ('male', 'male'),
+        ('female', 'female'),
+        ('others', 'others'),
+    )
     profile = models.ImageField(upload_to='profile/', blank=True, null=True)
     cover_photo = models.ImageField(upload_to='cover_photo/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    nick_name = models.CharField(max_length=254,blank=True, null=True)
+    fcm_token = models.CharField(max_length=254,blank=True, null=True)
+    gender = models.CharField(max_length=54, choices=GENDER_CHOICES,blank=True, null=True)
+    birth_day = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_svip = models.BooleanField(default=False)
-    # country = models.CharField(max_length=100, blank=True, null=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE,null=True,blank=True)
     level = models.ForeignKey(UserLV, related_name='level', on_delete=models.CASCADE,null=True,blank=True)
 
