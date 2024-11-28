@@ -3,29 +3,38 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
-from .models import CreateFamily, FamilyMember
-from .serializers import CreateFamilySerializer, FamilyMemberSerializer
+from .models import CreateFamily, FamilyMember,BonusLevel
+from .serializers import CreateFamilySerializer,CreateFamilyNEWSerializer, FamilyMemberSerializer
 from django.shortcuts import get_object_or_404
 from hapi_app.models import User,Wallet,WalletLog
 from django.utils.timezone import now, timedelta
 from .utils import calculate_family_contribution
 from django.db import models
+from django.db.models import Sum
+from datetime import timedelta
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 
 class CreateFamilyAPIView(APIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        serializer = CreateFamilySerializer(data=request.data)
+        serializer = CreateFamilyNEWSerializer(data=request.data)
         if serializer.is_valid():
             user_id = request.query_params.get("user_id")
+            print('user_id', user_id)
             user = get_object_or_404(User, id=user_id)
+            print('user', user)
 
             if CreateFamily.objects.filter(created_by=user).exists():
 	            return Response(
 	                {"error": f"User already Create Family"},
 	                status=status.HTTP_400_BAD_REQUEST
 	            )
+
+            # created_by=request.get(user)
 
             # Check if user is VIP
             if user.is_svip:
@@ -224,29 +233,167 @@ class DeleteInactiveFamiliesAPIView(APIView):
 
 
 
-class FamilyContributionAPI(APIView):
+from rest_framework.exceptions import ValidationError
+from django.db.models import Sum
+from datetime import timedelta
+from django.utils import timezone
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Sum
+from datetime import timedelta
+from django.utils import timezone
+
+class WeeklyFamilyAndMemberContributionAPIView(APIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny] 
-
-    def get(self, request):
+    def post(self, request, *args, **kwargs):
         try:
-            family_id = request.data.get("family_id")
-            family = CreateFamily.objects.get(id=family_id)
-            total_contribution = calculate_family_contribution(family)
-            data = {
-                "family_name": family.name,
-                "total_contribution": total_contribution,
-                "bonus_level": family.bonus_level,
-                "members": [
-                    {
-                        "username": member.user.username,
-                        "contribution": member.contribution,
-                        "is_leader": member.is_leader,
-                        "reward": member.reward
-                    } for member in family.members.all()
-                ]
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        except CreateFamily.DoesNotExist:
-            return Response({"error": "Family not found"}, status=status.HTTP_404_NOT_FOUND)
+            now = timezone.now()
+            last_week = now - timedelta(days=7)
+
+            families = CreateFamily.objects.all()
+
+            for family in families:
+                total_family_contribution = 0  # Initialize family contribution tracking
+                members = family.members.filter(is_join=True)
+
+                for member in members:
+                    wallet_logs = WalletLog.objects.filter(
+                        user=member.user, created_at__gte=last_week, action='debit'
+                    )
+
+                    credit_sum = wallet_logs.aggregate(total=Sum('coins_amount'))['total'] or 0
+
+
+                    member.contribution = credit_sum
+                    member.save()
+
+                    total_family_contribution += credit_sum
+
+                family.contribution = total_family_contribution
+                family.save()
+
+            return Response({"message": "Weekly family and member contributions updated successfully!"}, status=200)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
+
+class WeeklyBonusDistributionAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
+    def post(self, request, *args, **kwargs):
+        families = CreateFamily.objects.all()
+
+        for family in families:
+            # Calculate the total contribution for the family
+            total_contribution = family.members.aggregate(total=Sum('contribution'))['total'] or 0
+
+            # Find the current bonus level
+            current_bonus_level = BonusLevel.objects.filter(target_contribution__lte=total_contribution).order_by('-level').first()
+            print('current_bonus_level',current_bonus_level)
+            # Skip if the bonus level is already up-to-date
+            if current_bonus_level and family.bonus_level == current_bonus_level.level:
+                continue  # Skip to the next family
+
+            # Update the family's bonus level
+            if current_bonus_level:
+                family.bonus_level = current_bonus_level.level
+                family.save()
+
+                # Rank members based on their contributions
+                members = family.members.order_by('-contribution')
+
+                # Assign leader and top ranks
+                leader = members.first()
+                top_members = members[1:4]  # Top 1, Top 2, Top 3 (excluding the leader)
+
+                # Update coins in the wallet and save logs for the leader
+                if leader:
+                    self.save_bonus(leader.user, current_bonus_level.leader_coins, "Leader Bonus")
+
+                # Update coins for Top1, Top2, and Top3
+                for idx, member in enumerate(top_members):
+                    coins = [current_bonus_level.top1_coins, current_bonus_level.top2_coins, current_bonus_level.top3_coins]
+                    if idx < len(coins):  # Ensure index is within range
+                        bonus_type = f"Top {idx + 1} Bonus"
+                        self.save_bonus(member.user, coins[idx], bonus_type)
+
+        return Response({"message": "Weekly bonus distribution completed successfully!"}, status=status.HTTP_200_OK)
+
+    def save_bonus(self, user, coins, bonus_type):
+        """
+        Save coins to Wallet and log to WalletLog for a specific user.
+        """
+        # Update Wallet
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        wallet.gold_coins += coins
+        wallet.save()
+
+        # Save Log
+        WalletLog.objects.create(
+            user=user,
+            coins_amount=coins,
+            action="credit",
+            wallet_description=bonus_type
+        )
+
+
+
+class WeeklyFamilyRankingAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
+    def get(self, request, *args, **kwargs):
+        # Get the start and end of the current week (from last Sunday to today)
+        today = datetime.today()
+        start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
+        end_of_week = start_of_week + timedelta(days=7)  # Sunday of the current week
+
+        # Filter families based on the current week's contribution
+        families = CreateFamily.objects.annotate(
+            total_contribution=Sum('members__contribution')
+        ).filter(
+            created_at__gte=start_of_week, created_at__lte=end_of_week
+        ).order_by('-total_contribution')  # Sorting by total contribution in descending order
+
+        # Prepare the data to return
+        family_data = []
+        for family in families:
+            family_data.append({
+                'family_name': family.name,
+                'total_contribution': family.total_contribution,
+                'created_at': family.created_at,
+            })
+
+        return Response(family_data, status=status.HTTP_200_OK)
+
+
+
+class LastWeekFamilyRankingAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
+    def get(self, request, *args, **kwargs):
+        # Get the start and end of the last week (from last Monday to last Sunday)
+        today = datetime.today()
+        start_of_last_week = today - timedelta(days=today.weekday() + 7)  # Last Monday
+        end_of_last_week = start_of_last_week + timedelta(days=7)  # Last Sunday
+
+        # Filter families based on the last week's contribution
+        families = CreateFamily.objects.annotate(
+            total_contribution=Sum('members__contribution')
+        ).filter(
+            created_at__gte=start_of_last_week, created_at__lte=end_of_last_week
+        ).order_by('-total_contribution')  # Sorting by total contribution in descending order
+
+        # Prepare the data to return
+        family_data = []
+        for family in families:
+            family_data.append({
+                'family_name': family.name,
+                'total_contribution': family.total_contribution,
+                'created_at': family.created_at,
+            })
+
+        return Response(family_data, status=status.HTTP_200_OK)

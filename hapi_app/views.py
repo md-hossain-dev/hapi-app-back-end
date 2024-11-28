@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from .serializers import ImageSerializer,WalletSerializer,CountrySerializer,UserUpdateSerializer,UserUpdateImageSerializer
 from django.shortcuts import get_object_or_404
-
+from datetime import timedelta
 
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
@@ -36,15 +36,23 @@ class CustomObtainTokenView(APIView):
                 user.fcm_token = fcm_token
                 user.save()
 
+            # Token creation
             refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
-
+            
+            # Customizing access token expiration
+            custom_lifetime = timedelta(minutes=15)
+            access_token = refresh.access_token
+            access_token.set_exp(lifetime=custom_lifetime)
+            # Print the access_token and its expiration time
+            print(f"Access Token: {str(access_token)}")
+            print(f"Access Token Expiration: {access_token['exp']}")
+            
+            
             return Response({
                 'message': 'Login successful',
                 'user_id': user.id,
-                'access_token': access_token,
-                'refresh_token': refresh_token
+                'access_token': str(access_token),
+                'refresh_token': str(refresh)
             }, status=status.HTTP_200_OK)
         
         return Response({
@@ -54,16 +62,24 @@ class CustomObtainTokenView(APIView):
 
 
 
+
 class CustomRegisterUserView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
         username = request.data.get('username')
         email = request.data.get('email')
         phone_number = request.data.get('phone_number')
         password = request.data.get('password')
 
-        
+        if not first_name:
+            return Response({'message': 'first name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not last_name:
+            return Response({'message': 'last name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         if not username:
             return Response({'message': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -90,6 +106,8 @@ class CustomRegisterUserView(APIView):
 
         try:
             user = User.objects.create_user(
+                first_name=first_name,
+                last_name=last_name,
                 username=username,
                 email=email,
                 phone_number=phone_number,

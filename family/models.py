@@ -1,5 +1,6 @@
 from django.db import models
 from hapi_app.models import User, UserLV
+from django.core.exceptions import ValidationError
 
 
 class BonusLevel(models.Model):
@@ -31,6 +32,15 @@ class CreateFamily(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def clean(self):
+        if self.contribution < 0:
+            raise ValidationError("Contribution cannot be negative.")
+
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 
 class FamilyMember(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # User can only join one family
@@ -51,6 +61,14 @@ class FamilyMember(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.family.name}"
+
+    def clean(self):
+        if self.contribution < 0:
+            raise ValidationError("Contribution cannot be negative.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class TransactionLog(models.Model):

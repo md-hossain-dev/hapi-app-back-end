@@ -12,3 +12,12 @@ class FamilyMemberSerializer(serializers.ModelSerializer):
         model = FamilyMember
         fields = ['id', 'user', 'family', 'coins_contributed', 'joined_at']
         read_only_fields = ['id', 'joined_at']
+
+
+
+class CreateFamilyNEWSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateFamily
+        fields = ['id', 'name', 'family_notification', 'join_mode','contribution',  'created_at', 'level']
+
+

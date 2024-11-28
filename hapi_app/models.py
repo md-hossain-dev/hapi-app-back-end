@@ -30,6 +30,8 @@ class User(AbstractUser):
     )
     profile = models.ImageField(upload_to='profile/', blank=True, null=True)
     cover_photo = models.ImageField(upload_to='cover_photo/', blank=True, null=True)
+    first_name = models.CharField(max_length=50, blank=False, null=False)
+    last_name = models.CharField(max_length=50, blank=False, null=False)
     bio = models.TextField(blank=True, null=True)
     nick_name = models.CharField(max_length=254,blank=True, null=True)
     fcm_token = models.CharField(max_length=254,blank=True, null=True)
