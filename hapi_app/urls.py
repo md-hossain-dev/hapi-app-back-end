@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomObtainTokenView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
+from .views import CustomObtainTokenView,UserWalletCountAPIView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
 
 urlpatterns = [
     path('login/', CustomObtainTokenView.as_view(), name='login'),
@@ -17,4 +17,5 @@ urlpatterns = [
     path('countries/', CountryListAPIView.as_view(), name='country-list'),
     path('user-update/', UserUpdateAPIView.as_view(), name='user-update'),
     path('update-profile-image/', UserProfileImageUpdateAPIView.as_view(), name='update-profile-image'),
+    path('user-wallet/', UserWalletCountAPIView.as_view(), name='user_wallet'),
 ]

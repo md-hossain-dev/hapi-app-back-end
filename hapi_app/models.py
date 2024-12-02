@@ -28,6 +28,8 @@ class User(AbstractUser):
         ('female', 'female'),
         ('others', 'others'),
     )
+    email = models.EmailField(unique=True, blank=False, null=False)  
+    username = models.CharField(max_length=150, blank=True, null=True)
     profile = models.ImageField(upload_to='profile/', blank=True, null=True)
     cover_photo = models.ImageField(upload_to='cover_photo/', blank=True, null=True)
     first_name = models.CharField(max_length=50, blank=False, null=False)
@@ -55,9 +57,27 @@ class User(AbstractUser):
         blank=True
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username'] 
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email.split('@')[0]
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.username
 
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_sent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} -> {self.user.username}"
 
 
 

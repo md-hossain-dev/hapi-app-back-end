@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'c_p',
     'family',
     'app_admin',
+    'medal',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',

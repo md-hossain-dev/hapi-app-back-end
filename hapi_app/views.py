@@ -15,23 +15,27 @@ from .serializers import ImageSerializer,WalletSerializer,CountrySerializer,User
 from django.shortcuts import get_object_or_404
 from datetime import timedelta
 
+from .utils import send_firebase_notification
+from google.auth.transport.requests import Request
+
+from .models import Notification
+
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
-        fcm_token = request.data.get('fcm_token') 
-
-        if not username or not password:
+        fcm_token = request.data.get('fcm_token')  
+        if not email or not password:
             return Response({
-                'message': 'Username and password are required.'
+                'message': 'email and password are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         
         if user is not None and user.is_active:
-            # FCM Token save
+            # Save the FCM token
             if fcm_token:
                 user.fcm_token = fcm_token
                 user.save()
@@ -40,24 +44,143 @@ class CustomObtainTokenView(APIView):
             refresh = RefreshToken.for_user(user)
             
             # Customizing access token expiration
-            custom_lifetime = timedelta(minutes=15)
+            custom_lifetime = timedelta(days=365)
             access_token = refresh.access_token
             access_token.set_exp(lifetime=custom_lifetime)
-            # Print the access_token and its expiration time
-            print(f"Access Token: {str(access_token)}")
-            print(f"Access Token Expiration: {access_token['exp']}")
-            
-            
+
+            # Send Welcome Notification
+            if user.fcm_token:
+                title = "Welcome!"
+                body = f"Hello {user.username}, you have successfully logged in."
+                notification_response = send_firebase_notification(user.fcm_token, title, body)
+                print("Firebase Response:", notification_response)
+
+                # Save the notification in the database
+                notification = Notification(
+                    user=user,
+                    title=title,
+                    message=body,
+                    is_sent=True  # Indicating the notification was sent successfully
+                )
+                notification.save()
+
             return Response({
                 'message': 'Login successful',
                 'user_id': user.id,
                 'access_token': str(access_token),
-                'refresh_token': str(refresh)
+                'refresh_token': str(refresh),
+                'notification_status': 'Notification sent successfully' if user.fcm_token else 'No FCM token available'
             }, status=status.HTTP_200_OK)
         
         return Response({
             'message': 'Login failed: Invalid credentials or inactive user'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# class CustomObtainTokenView(APIView):
+#     permission_classes = [AllowAny]
+    
+#     def post(self, request, *args, **kwargs):
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+#         fcm_token = request.data.get('fcm_token')  
+#         if not email or not password:
+#             return Response({
+#                 'message': 'email and password are required.'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         user = authenticate(request, email=email, password=password)
+        
+#         if user is not None and user.is_active:
+#             # Save the FCM token
+#             if fcm_token:
+#                 user.fcm_token = fcm_token
+#                 user.save()
+
+#             # Token creation
+#             refresh = RefreshToken.for_user(user)
+            
+#             # Customizing access token expiration
+#             custom_lifetime = timedelta(minutes=15)
+#             access_token = refresh.access_token
+#             access_token.set_exp(lifetime=custom_lifetime)
+
+#             # Send Welcome Notification
+#             if user.fcm_token:
+#                 title = "Welcome!"
+#                 body = f"Hello {user.username}, you have successfully logged in."
+#                 notification_response = send_firebase_notification(user.fcm_token, title, body)
+#                 print("Firebase Response:", notification_response)
+
+#                 # Save the notification in the database
+#                 notification = Notification(
+#                     user=user,
+#                     title=title,
+#                     message=body,
+#                     is_sent=True  # Indicating the notification was sent successfully
+#                 )
+#                 notification.save()
+
+#             return Response({
+#                 'message': 'Login successful',
+#                 'user_id': user.id,
+#                 'access_token': str(access_token),
+#                 'refresh_token': str(refresh),
+#                 'notification_status': 'Notification sent successfully' if user.fcm_token else 'No FCM token available'
+#             }, status=status.HTTP_200_OK)
+        
+#         return Response({
+#             'message': 'Login failed: Invalid credentials or inactive user'
+#         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+# class CustomObtainTokenView(APIView):
+#     permission_classes = [AllowAny]
+    
+#     def post(self, request, *args, **kwargs):
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         fcm_token = request.data.get('fcm_token') 
+
+#         if not username or not password:
+#             return Response({
+#                 'message': 'Username and password are required.'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         user = authenticate(request, username=username, password=password)
+        
+#         if user is not None and user.is_active:
+#             # FCM Token save
+#             if fcm_token:
+#                 user.fcm_token = fcm_token
+#                 user.save()
+
+#             # Token creation
+#             refresh = RefreshToken.for_user(user)
+            
+#             # Customizing access token expiration
+#             custom_lifetime = timedelta(minutes=15)
+#             access_token = refresh.access_token
+#             access_token.set_exp(lifetime=custom_lifetime)
+#             # Print the access_token and its expiration time
+#             print(f"Access Token: {str(access_token)}")
+#             print(f"Access Token Expiration: {access_token['exp']}")
+            
+            
+#             return Response({
+#                 'message': 'Login successful',
+#                 'user_id': user.id,
+#                 'access_token': str(access_token),
+#                 'refresh_token': str(refresh)
+#             }, status=status.HTTP_200_OK)
+        
+#         return Response({
+#             'message': 'Login failed: Invalid credentials or inactive user'
+#         }, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -75,14 +198,17 @@ class CustomRegisterUserView(APIView):
         password = request.data.get('password')
 
         if not first_name:
-            return Response({'message': 'first name is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'First name is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not last_name:
-            return Response({'message': 'last name is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Last name is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not username:
             return Response({'message': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if User.objects.filter(username=username).exists():
+            return Response({'message': 'username is already in use'}, status=status.HTTP_400_BAD_REQUEST)
+        
         if not email:
             return Response({'message': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -105,13 +231,19 @@ class CustomRegisterUserView(APIView):
             return Response({'message': 'Password must be at least 8 characters long and contain both letters and numbers'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Nick name 
+            nick_name = f"{first_name} {last_name}"
+            print('nick_name',nick_name)
+
+            
             user = User.objects.create_user(
                 first_name=first_name,
                 last_name=last_name,
                 username=username,
                 email=email,
                 phone_number=phone_number,
-                password=password
+                password=password,
+                nick_name=nick_name
             )
             return Response({
                 'message': 'User registered successfully',
@@ -152,6 +284,7 @@ class FollowUserAPIView(APIView):
 
 
 class UserWithFollowersCountAPIView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, user_id, *args, **kwargs):
         try:
             user = User.objects.get(id=user_id)
@@ -159,6 +292,8 @@ class UserWithFollowersCountAPIView(APIView):
 
             followers_count = user.followers.count()
             following_count = user.following.count()
+            visitor_count = UserProfileVisit.objects.get(user=user)
+            
 
             data = {
                 'user': {
@@ -167,6 +302,7 @@ class UserWithFollowersCountAPIView(APIView):
                 },
                 'followers_count': followers_count,
                 'following_count': following_count,
+                'visitor_count': visitor_count.visit_count
             }
             return Response(data, status=status.HTTP_200_OK)
 
@@ -176,6 +312,7 @@ class UserWithFollowersCountAPIView(APIView):
 
 
 class ProfileVisitCountAPIView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, user_id, *args, **kwargs):
         try:
             user = User.objects.get(id=user_id)
@@ -607,8 +744,31 @@ class UserProfileImageUpdateAPIView(APIView):
 
 
 
+class UserWalletCountAPIView(APIView):
+    permission_classes = [AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'message': 'user_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            user = User.objects.get(id=user_id)
+            user_wallet = Wallet.objects.get(user=user)
 
+            data = {
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                },
+                'user_wallet_gold_coins': user_wallet.gold_coins,
+                'user_wallet_diamond_coins': user_wallet.diamond_coins
+            }
+            return Response(data, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Wallet.DoesNotExist:
+            return Response({'message': 'Wallet not found for the user'}, status=status.HTTP_404_NOT_FOUND)
 
 
