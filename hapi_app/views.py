@@ -11,36 +11,67 @@ from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
-from .serializers import ImageSerializer,WalletSerializer
+from .serializers import ImageSerializer,WalletSerializer,CountrySerializer,UserUpdateSerializer,UserUpdateImageSerializer
+from django.shortcuts import get_object_or_404
+from datetime import timedelta
 
+from .utils import send_firebase_notification
+from google.auth.transport.requests import Request
 
+from .models import Notification
+from django.db import transaction
+from django.core.files.base import ContentFile
+import requests
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
-       
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
-
-        if not username or not password:
+        fcm_token = request.data.get('fcm_token')  
+        if not email or not password:
             return Response({
-                'message': 'Username and password are required.'
+                'message': 'email and password are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-       
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         
         if user is not None and user.is_active:
-            
+            # Save the FCM token
+            if fcm_token:
+                user.fcm_token = fcm_token
+                user.save()
+
+            # Token creation
             refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
+            
+            # Customizing access token expiration
+            custom_lifetime = timedelta(days=365)
+            access_token = refresh.access_token
+            access_token.set_exp(lifetime=custom_lifetime)
+
+            # Send Welcome Notification
+            if user.fcm_token:
+                title = "Welcome!"
+                body = f"Hello {user.username}, you have successfully logged in."
+                notification_response = send_firebase_notification(user.fcm_token, title, body)
+                print("Firebase Response:", notification_response)
+
+                # Save the notification in the database
+                notification = Notification(
+                    user=user,
+                    title=title,
+                    message=body,
+                    is_sent=True  # Indicating the notification was sent successfully
+                )
+                notification.save()
 
             return Response({
                 'message': 'Login successful',
                 'user_id': user.id,
-                'access_token': access_token,
-                'refresh_token': refresh_token
+                'access_token': str(access_token),
+                'refresh_token': str(refresh),
+                'notification_status': 'Notification sent successfully' if user.fcm_token else 'No FCM token available'
             }, status=status.HTTP_200_OK)
         
         return Response({
@@ -50,19 +81,236 @@ class CustomObtainTokenView(APIView):
 
 
 
+class GoogleAuthAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        required_fields = ['google_token', 'unique_id', 'auth_type', 'access_token_google', 
+                           'password', 'email', 'nick_name', 'profile_image_url']
+        data = request.data
+
+        # Validate required fields
+        if not all(field in data and data[field] for field in required_fields):
+            return Response({'message': 'All fields are required.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        google_token = data.get('google_token')
+        unique_id = data.get('unique_id')
+        auth_type = data.get('auth_type')
+        access_token_google = data.get('access_token_google')
+        password = data.get('password')
+        email = data.get('email')
+        nick_name = data.get('nick_name')
+        profile_image_url = data.get('profile_image_url')
+
+        try:
+            # Check if user already exists
+            user = User.objects.filter(email=email).first()
+
+            if user:
+                # User exists, check password
+                if not user.check_password(password):
+                    return Response({'message': 'Invalid password.'}, 
+                                    status=status.HTTP_401_UNAUTHORIZED)
+
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'message': 'Login successful',
+                    'user_id': user.id,
+                    'email': user.email,
+                    'nick_name': user.first_name,
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                }, status=status.HTTP_200_OK)
+            else:
+                # Create a new user
+                user = User(
+                    google_token=google_token,
+                    unique_id=unique_id,
+                    auth_type=auth_type,
+                    access_token_google=access_token_google,
+                    password=password,
+                    email=email,
+                    nick_name=nick_name
+                )
+                user.set_password(password)
+                
+                # Save user to generate primary key
+                user.save()
+
+                # Download and save profile image
+                if profile_image_url:
+
+                    try:
+                        response = requests.get(profile_image_url, stream=True)
+                        if response.status_code == 200:
+                            # Extract the filename from the URL or use a custom name
+                            filename = f"{unique_id}_profile.jpg"
+                            
+                            # Save the image to the profile field
+                            user.profile.save(filename, ContentFile(response.content), save=True)
+                        else:
+                            return Response({
+                                'message': 'Failed to download image from the provided URL.',
+                                'status_code': response.status_code
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    except requests.exceptions.RequestException as e:
+                        return Response({
+                            'message': 'Error occurred while downloading the profile image.',
+                            'error': str(e)
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'message': 'User created and logged in successfully',
+                    'user_id': user.id,
+                    'email': user.email,
+                    'nick_name': user.nick_name,
+                    'profile_image': user.profile.url if user.profile else None,
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'message': 'Something went wrong', 'error': str(e)}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# class CustomObtainTokenView(APIView):
+#     permission_classes = [AllowAny]
+    
+#     def post(self, request, *args, **kwargs):
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+#         fcm_token = request.data.get('fcm_token')  
+#         if not email or not password:
+#             return Response({
+#                 'message': 'email and password are required.'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         user = authenticate(request, email=email, password=password)
+        
+#         if user is not None and user.is_active:
+#             # Save the FCM token
+#             if fcm_token:
+#                 user.fcm_token = fcm_token
+#                 user.save()
+
+#             # Token creation
+#             refresh = RefreshToken.for_user(user)
+            
+#             # Customizing access token expiration
+#             custom_lifetime = timedelta(minutes=15)
+#             access_token = refresh.access_token
+#             access_token.set_exp(lifetime=custom_lifetime)
+
+#             # Send Welcome Notification
+#             if user.fcm_token:
+#                 title = "Welcome!"
+#                 body = f"Hello {user.username}, you have successfully logged in."
+#                 notification_response = send_firebase_notification(user.fcm_token, title, body)
+#                 print("Firebase Response:", notification_response)
+
+#                 # Save the notification in the database
+#                 notification = Notification(
+#                     user=user,
+#                     title=title,
+#                     message=body,
+#                     is_sent=True  # Indicating the notification was sent successfully
+#                 )
+#                 notification.save()
+
+#             return Response({
+#                 'message': 'Login successful',
+#                 'user_id': user.id,
+#                 'access_token': str(access_token),
+#                 'refresh_token': str(refresh),
+#                 'notification_status': 'Notification sent successfully' if user.fcm_token else 'No FCM token available'
+#             }, status=status.HTTP_200_OK)
+        
+#         return Response({
+#             'message': 'Login failed: Invalid credentials or inactive user'
+#         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+# class CustomObtainTokenView(APIView):
+#     permission_classes = [AllowAny]
+    
+#     def post(self, request, *args, **kwargs):
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         fcm_token = request.data.get('fcm_token') 
+
+#         if not username or not password:
+#             return Response({
+#                 'message': 'Username and password are required.'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         user = authenticate(request, username=username, password=password)
+        
+#         if user is not None and user.is_active:
+#             # FCM Token save
+#             if fcm_token:
+#                 user.fcm_token = fcm_token
+#                 user.save()
+
+#             # Token creation
+#             refresh = RefreshToken.for_user(user)
+            
+#             # Customizing access token expiration
+#             custom_lifetime = timedelta(minutes=15)
+#             access_token = refresh.access_token
+#             access_token.set_exp(lifetime=custom_lifetime)
+#             # Print the access_token and its expiration time
+#             print(f"Access Token: {str(access_token)}")
+#             print(f"Access Token Expiration: {access_token['exp']}")
+            
+            
+#             return Response({
+#                 'message': 'Login successful',
+#                 'user_id': user.id,
+#                 'access_token': str(access_token),
+#                 'refresh_token': str(refresh)
+#             }, status=status.HTTP_200_OK)
+        
+#         return Response({
+#             'message': 'Login failed: Invalid credentials or inactive user'
+#         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 class CustomRegisterUserView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
         username = request.data.get('username')
         email = request.data.get('email')
         phone_number = request.data.get('phone_number')
         password = request.data.get('password')
 
-        
+        if not first_name:
+            return Response({'message': 'First name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not last_name:
+            return Response({'message': 'Last name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         if not username:
             return Response({'message': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if User.objects.filter(username=username).exists():
+            return Response({'message': 'username is already in use'}, status=status.HTTP_400_BAD_REQUEST)
+        
         if not email:
             return Response({'message': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -85,11 +333,19 @@ class CustomRegisterUserView(APIView):
             return Response({'message': 'Password must be at least 8 characters long and contain both letters and numbers'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            # Nick name 
+            nick_name = f"{first_name} {last_name}"
+            print('nick_name',nick_name)
+
+            
             user = User.objects.create_user(
+                first_name=first_name,
+                last_name=last_name,
                 username=username,
                 email=email,
                 phone_number=phone_number,
-                password=password
+                password=password,
+                nick_name=nick_name
             )
             return Response({
                 'message': 'User registered successfully',
@@ -129,11 +385,47 @@ class FollowUserAPIView(APIView):
 
 
 
+# class UserWithFollowersCountAPIView(APIView):
+#     permission_classes = [AllowAny]
+#     def get(self, request, user_id, *args, **kwargs):
+#         try:
+#             user = User.objects.get(id=user_id)
+
+
+#             followers_count = user.followers.count()
+#             following_count = user.following.count()
+#             visitor_count = UserProfileVisit.objects.get(user=user)
+            
+
+#             data = {
+#                 'user': {
+#                     'id': user.id,
+#                     'username': user.username,
+#                 },
+#                 'followers_count': followers_count,
+#                 'following_count': following_count,
+#                 'visitor_count': visitor_count.visit_count
+#             }
+#             return Response(data, status=status.HTTP_200_OK)
+
+#         except User.DoesNotExist:
+#             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class UserWithFollowersCountAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, user_id, *args, **kwargs):
         try:
             user = User.objects.get(id=user_id)
 
+            with transaction.atomic():
+                if not hasattr(user, 'followers'):
+                    user.followers.create()  
+                if not hasattr(user, 'following'):
+                    user.following.create()
+
+            user_profile_visit, created = UserProfileVisit.objects.get_or_create(user=user, defaults={'visit_count': 0})
 
             followers_count = user.followers.count()
             following_count = user.following.count()
@@ -145,15 +437,17 @@ class UserWithFollowersCountAPIView(APIView):
                 },
                 'followers_count': followers_count,
                 'following_count': following_count,
+                'visitor_count': user_profile_visit.visit_count
             }
+
             return Response(data, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 class ProfileVisitCountAPIView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, user_id, *args, **kwargs):
         try:
             user = User.objects.get(id=user_id)
@@ -494,30 +788,122 @@ class CreateOrUpdateWalletAPIView(APIView):
 
 
 
+class CountryListAPIView(APIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        countries = Country.objects.all()
+        serializer = CountrySerializer(countries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+class UserUpdateAPIView(APIView):
+    # permission_classes = [IsAuthenticated]  
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user') 
+        if not user_id:
+            return Response({
+                'message': 'User ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserUpdateImageSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        if not user_id:
+            return Response({
+                'message': 'User ID is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+
+        # Custom validation for fields
+        nick_name = request.data.get('nick_name')
+        if nick_name and len(nick_name) < 3:
+            return Response({
+                'message': 'Nick name must be at least 3 characters long.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        bio = request.data.get('bio')
+        gender = request.data.get('gender')
+        country = request.data.get('country')
+        birthday = request.data.get('birthday')
+
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': 'User information updated successfully',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response({
+            'message': 'Invalid data',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileImageUpdateAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def put(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')  
+        user = get_object_or_404(User, id=user_id)
+        
+        profile_image = request.FILES.get('profile')
+
+        if not profile_image:
+            return Response({
+                'message': 'Profile image is required.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        user.profile = profile_image
+        user.save()
+
+        return Response({
+            'message': 'Profile image updated successfully',
+            'profile_url': user.profile.url if user.profile else None
+        }, status=status.HTTP_200_OK)
 
 
 
 
 
 
+class UserWalletCountAPIView(APIView):
+    permission_classes = [AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'message': 'user_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            user = User.objects.get(id=user_id)
+            user_wallet = Wallet.objects.get(user=user)
 
+            data = {
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                },
+                'user_wallet_gold_coins': user_wallet.gold_coins,
+                'user_wallet_diamond_coins': user_wallet.diamond_coins
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Wallet.DoesNotExist:
+            return Response({'message': 'Wallet not found for the user'}, status=status.HTTP_404_NOT_FOUND)
 
 

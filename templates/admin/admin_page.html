@@ -9,7 +9,7 @@
 <section class="content">
     <div class="page-heading">
         <h1>Dashboard</h1>
-        <p> Friday · May 24, 2024 · 12:31:27 AM GMT+5</p>
+        <p id="date-time"></p>
     </div>
 
     <div class="welcome-box">
@@ -132,6 +132,36 @@
 
 
 <script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+<script type="application/javascript">
+    function updateDateTime() {
+        const currentDate = new Date();
+        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const monthsOfYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const day = daysOfWeek[currentDate.getDay()];
+        const month = monthsOfYear[currentDate.getMonth()];
+        const date = currentDate.getDate();
+        const year = currentDate.getFullYear();
+
+        const hours = currentDate.getHours();
+        const minutes = currentDate.getMinutes();
+        const seconds = currentDate.getSeconds();
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;  // 12-hour format
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+        const dateTimeString = `${day} · ${month} ${date}, ${year} · ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm} GMT+5`;
+
+        document.getElementById("date-time").innerText = dateTimeString;
+    }
+
+    setInterval(updateDateTime, 1000);
+
+    updateDateTime();
+</script>
 
 {% endblock content %}
 

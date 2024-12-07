@@ -13,7 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'name', 'category', 'description','day', 'image', 'price']
+        fields = ['id', 'name', 'category', 'description','day', 'image', 'price','star']
 
     def validate_image(self, value):
         

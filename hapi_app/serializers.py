@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Image,Wallet
+from .models import Image,Wallet,Country,User
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,3 +19,20 @@ class WalletSerializer(serializers.ModelSerializer):
         return value
 
     
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = '__all__'
+
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','nick_name', 'gender', 'bio', 'country', 'birth_day']
+
+
+class UserUpdateImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','nick_name', 'gender', 'bio', 'country', 'birth_day','profile','first_name','last_name']

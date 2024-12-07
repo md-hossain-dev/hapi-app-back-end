@@ -2,12 +2,60 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
 
+class UserLV(models.Model):
+    level_name = models.CharField(max_length=20, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.level_name
+
+
+
+class Country(models.Model):
+    name = models.CharField(max_length=54, unique=True)
+    short_code = models.CharField(max_length=20, unique=True)
+    county_flag = models.ImageField(upload_to='county_flag/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+
 class User(AbstractUser):
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    GENDER_CHOICES = (
+        ('male', 'male'),
+        ('female', 'female'),
+        ('others', 'others'),
+    )
+    AUTH_CHOICES = (
+        ('google', 'google'),
+        ('facebook', 'facebook'),
+    )
+    email = models.EmailField(unique=True, blank=False, null=False)  
+    username = models.CharField(max_length=150, blank=True, null=True)
+    profile = models.ImageField(upload_to='profile/', blank=True, null=True)
+    cover_photo = models.ImageField(upload_to='cover_photo/', blank=True, null=True)
+    first_name = models.CharField(max_length=50, blank=False, null=False)
+    last_name = models.CharField(max_length=50, blank=False, null=False)
     bio = models.TextField(blank=True, null=True)
+    nick_name = models.CharField(max_length=254,blank=True, null=True)
+    fcm_token = models.CharField(max_length=254,blank=True, null=True)
+    gender = models.CharField(max_length=54, choices=GENDER_CHOICES,blank=True, null=True)
+    birth_day = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_svip = models.BooleanField(default=False)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE,null=True,blank=True)
+    level = models.ForeignKey(UserLV, related_name='level', on_delete=models.CASCADE,null=True,blank=True)
+
+    # google login
+    google_token = models.CharField(max_length=1000,blank=True, null=True)
+    unique_id = models.CharField(max_length=1000,blank=True, null=True)
+    auth_type = models.CharField(max_length=54, choices=AUTH_CHOICES,blank=True, null=True)
+    access_token_google = models.CharField(max_length=1000,blank=True, null=True)
+
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -20,9 +68,27 @@ class User(AbstractUser):
         blank=True
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username'] 
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email.split('@')[0]
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.username
 
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_sent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} -> {self.user.username}"
 
 
 

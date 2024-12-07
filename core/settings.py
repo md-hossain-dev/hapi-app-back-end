@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +43,10 @@ INSTALLED_APPS = [
     'hapi_app',
     'store',
     'c_p',
+    'family',
     'app_admin',
+    'medal',
+    'walletusers',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -91,6 +95,16 @@ REST_FRAMEWORK = {
 }
 
 
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 
 AUTH_USER_MODEL = 'hapi_app.User'
@@ -144,7 +158,10 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -160,3 +177,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your_email@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'your_email_password'  # Replace with your password
+
+
+MINIMUM_PASSWORD_LENGTH = 8
+MAXIMUM_PASSWORD_LENGTH = 64
