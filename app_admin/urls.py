@@ -10,10 +10,10 @@ from django.views.generic import TemplateView
 from django.urls import path
 from . import views
 
-from app_admin.admin_views import LoginPageView,LogoutView,UserLVListView,CountryListView,AllUserViewList,UserUpdateAPIView,UserDetailView,UserDeleteView
+from app_admin.admin_views import LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,UserDetailView,UserDeleteView
 from app_admin.security_views import TokenObtainPairView, TokenRefreshView,UserIdView
 
-from app_admin.views import UserListAdminView,UserEditView
+from app_admin.views import UserListAdminView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
 
 
 urlpatterns = [
@@ -22,6 +22,11 @@ urlpatterns = [
     path('user-update/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
     path('delete-user/<int:user_id>/', UserDeleteView.as_view(), name='delete-user'),
     path('user-details/<int:pk>/', UserDetailView.as_view(), name='delete_details'),
+
+    path('store-lists/', AllStoreViewList.as_view(), name='store_lists'),
+    path('category-lists-store/', AllStoreCategoryViewList.as_view(), name='category_lists_store'),
+
+    
 
     path('country-details/', CountryListView.as_view(), name='country_details'),
     path('level-details/', UserLVListView.as_view(), name='level_details'),
@@ -36,7 +41,10 @@ urlpatterns = [
     
 
     path('user-list/', UserListAdminView.as_view(), name='user_list'), 
-    path('user-edit/', UserEditView.as_view(), name='user_edit'), 
+    path('user-edit/', UserEditView.as_view(), name='user_edit'),
+
+    path('store-list/', StoreListAdminView.as_view(), name='store_list'), 
+    path('catagory-list/', CatagoryStoreListAdminView.as_view(), name='catagory_list'), 
 
     # path('user-list/', views.UserListAdmin, name='user_list'),
 

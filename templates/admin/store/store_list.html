@@ -1,0 +1,373 @@
+{% extends "base/admin_base.html" %}
+{% load static %}
+
+{% block title %}Store Info{% endblock title %}
+
+{% block content %}
+<style type="text/css">
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        margin: 0 5px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<section class="content">
+    <div class="page-heading">
+        <h1>Store List</h1>
+        <p id="date-time"></p>
+    </div>
+
+    <div class="select-box-and-table">
+        <div>
+            <table id="id_table_blog" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Day</th>
+                        <th>Star</th>
+                        <th>Price</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="blog_details"></tbody>
+            </table>
+            <div id="id_loading_data" class="overlay" style="display: none;">
+                <i class="fas fa-2x fa-sync-alt rotate"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Structure for User Details -->
+
+    <div class="modal fade" id="user_details_modal" tabindex="-1" role="dialog" aria-labelledby="user_details_modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="user_details_modalTitle">User Details</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="user_details_modal_data">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Delete Confirmation Modal -->
+<!-- Modal for Confirm Deletion -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <!-- Close Button (×) Removed -->
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this user?
+            </div>
+            <div class="modal-footer">
+                <!-- No Button to Close Modal -->
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <!-- Yes Button to Confirm Deletion -->
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script type="application/javascript">
+    // Function to delete user by userId
+    // Function to delete user by userId
+    function deleteUser(userId) {
+        // Show the confirmation modal
+        $('#deleteConfirmationModal').modal('show');
+
+        // Bind the click event to the "Yes" button in the modal
+        $('#confirmDeleteBtn').on('click', function() {
+            const jwtToken = localStorage.getItem("jwtToken");
+            // Proceed with the deletion after user clicks "Yes"
+            axios.delete(`http://127.0.0.1:8000/delete-user/${userId}/`, {
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}", // CSRF Token
+                    "Authorization": `Bearer ${jwtToken}` // JWT Token from localStorage
+                }
+            })
+            .then(response => {
+                const data = response.data;  // Axios automatically parses the JSON
+                if (data.message) {
+                    // Show success message using Toastr
+                    toastr.success(data.message, 'Success');
+                    $('#id_table_blog').DataTable().ajax.reload();
+                    // Optionally, remove the deleted user row from the UI
+                } else {
+                    // Show error message using Toastr
+                    toastr.error(data.error || "An error occurred!", 'Error');
+                }
+
+                // Close the modal after deletion
+                $('#deleteConfirmationModal').modal('hide');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message using Toastr
+                toastr.error('Something went wrong!', 'Error');
+
+                // Close the modal in case of error
+                $('#deleteConfirmationModal').modal('hide');
+            });
+        });
+
+        // The "No" button will close the modal
+        $('#deleteConfirmationModal').on('click', '.btn-secondary', function() {
+            // Close the modal when the user clicks "No"
+            $('#deleteConfirmationModal').modal('hide');
+        });
+
+        // Reset the event handler for "Yes" button to avoid multiple bindings
+        $('#deleteConfirmationModal').on('hidden.bs.modal', function() {
+            $('#confirmDeleteBtn').off('click');
+        });
+    }
+
+
+    
+
+    function singleUser(userId) {
+    if (userId == null) {
+        console.error("Invalid user ID");
+        return;
+    }
+
+    // Clear previous modal content
+    $('#user_details_modal_data').empty();
+
+    // Get the JWT token from localStorage
+    const jwtToken = localStorage.getItem("jwtToken");
+    console.log("JWT Token inside singleUser: ", jwtToken);  // Check the token
+
+    // Check if token is present
+    if (!jwtToken) {
+        console.error("JWT Token is missing or invalid");
+        toastr.error("JWT Token is missing or invalid", "Error");
+        return;
+    }
+
+    // API call to fetch the user details
+    axios.put(`http://127.0.0.1:8000/user-update/${userId}/`, {
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",  // CSRF Token
+            "Authorization": `Bearer ${jwtToken}`  // Attach JWT Token as Bearer token
+        }
+    })
+    .then((result) => {
+        const user = result?.data?.data;
+        console.log("User details: ", user);  // Check if data is returned correctly
+
+        // Update modal content with user data
+        $('#user_details_modal_data').append(` 
+            <div class="model_data">
+                <h5 class="model_data_title"><b>Email: </b> ${user.email}</h5>
+                <div><b>User Name: </b> ${user.username}</div>
+                <div><b>First Name: </b> ${user.first_name}</div>
+                <div><b>Last Name: </b> ${user.last_name}</div>
+                <div><b>Bio: </b> ${user.bio}</div>
+                <div><b>Nick Name: </b> ${user.nick_name}</div>
+                <div><b>Gender: </b> ${user.gender}</div>
+                <div><b>Birth Day: </b> ${user.birth_day}</div>
+                <div><b>Phone Number: </b> ${user.phone_number}</div>
+                <div><b>Active: </b> ${user.is_active ? 'Yes' : 'No'}</div>
+                <div><b>Vip: </b> ${user.is_svip ? 'Yes' : 'No'}</div>
+                <div><b>Level: </b> ${user.level}</div>
+                <div><b>Country: </b> ${user.country}</div>
+            </div>
+        `);
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('user_details_modal'));
+        modal.show();
+    })
+    .catch((error) => {
+        toastr.error('Error fetching User information');
+        console.error('Error fetching User information:', error);
+    });
+}
+
+
+
+
+    // Initialize the DataTable and load data
+    function initializeDataTable() {
+        const loadingData = document.getElementById("id_loading_data");
+
+        $("#id_table_blog").DataTable({
+            paging: true,
+            destroy: true,
+            pageLength: 1,
+            serverSide: true,
+            ajax: {
+                url: `http://127.0.0.1:8000/store-lists`,
+                type: "GET",
+                data: function (data) {
+                    const page = Math.floor(data?.start / data?.length) + 1;
+                    const size = data?.length;
+                    const searchQuery = data?.search?.value; 
+                    return { page, size, q: searchQuery };
+                },
+                dataSrc: function (apiResponse) {
+                    const dataUserShow = [];
+                    const recordsTotal = apiResponse?.count;
+
+                    $.extend(apiResponse, {
+                        recordsTotal,
+                        recordsFiltered: recordsTotal
+                    });
+
+                    apiResponse?.results?.data.forEach(d => {
+                        dataUserShow.push([ 
+                            d.id || "",
+                            d.name || "",
+                            d.category || "",
+                            d.description || "",
+                            d.day || "",
+                            d.star || "",
+                            d.price || "",
+                            d.is_active || "",
+                            `<div class="td-container d-flex justify-content-around">
+                                <a class="btn btn-sm btn-primary" href="javascript:void(0)" onclick="singleUser(${d?.id})">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+
+                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteUser(${d?.id})">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+
+                                <a class="btn btn-sm btn-secondary" href="{% url 'user_edit' %}?id_user=${d.id}">
+                                  <i class="fa fa-edit"></i> 
+                                </a>
+                            </div>`
+                        ]);
+                    });
+
+                    loadingData.style.display = "none";
+                    return dataUserShow;
+                },
+                beforeSend: function (request) {
+                    const jwtToken = localStorage.getItem("jwtToken");
+                    if (jwtToken) {
+                        // Adding Authorization header with JWT token
+                        request.setRequestHeader("Authorization", `Bearer ${jwtToken}`);
+                    }
+                    request.setRequestHeader("X-CSRFToken", "{{ csrf_token }}"); // CSRF token header
+                    loadingData.style.display = "flex";
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    loadingData.style.display = "none";
+                    console.error("Error:", errorThrown);
+                }
+            },
+            columns: [
+                { title: "ID" },
+                { title: "Name" },
+                { title: "Category" },
+                { title: "Description" },
+                { title: "Day" },
+                { title: "Star" },
+                { title: "Price" },
+                { title: "is_active" },
+                { title: "Actions", orderable: false }
+            ],
+            order: [[0, 'desc']],
+            language: {
+                search: "Search by Name",
+                lengthMenu: "_MENU_",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries"
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        initializeDataTable(); // Initialize DataTable on page load
+    });
+</script>
+
+
+
+<script type="application/javascript">
+    function updateDateTime() {
+        const currentDate = new Date();
+        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const monthsOfYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const day = daysOfWeek[currentDate.getDay()];
+        const month = monthsOfYear[currentDate.getMonth()];
+        const date = currentDate.getDate();
+        const year = currentDate.getFullYear();
+
+        const hours = currentDate.getHours();
+        const minutes = currentDate.getMinutes();
+        const seconds = currentDate.getSeconds();
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;  // 12-hour format
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+        const dateTimeString = `${day} · ${month} ${date}, ${year} · ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm} GMT+5`;
+
+        document.getElementById("date-time").innerText = dateTimeString;
+    }
+
+    setInterval(updateDateTime, 1000);
+
+    updateDateTime();
+</script>
+<script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+{% endblock content %}

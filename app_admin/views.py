@@ -26,7 +26,20 @@ class UserEditView(TemplateView):
     def get_context_data(self,*args, **kwargs):
         kwargs['id_user'] = self.request.GET['id_user']
         context = super().get_context_data(*args, **kwargs)
-        return context   
+        return context  
+
+
+class StoreListAdminView(TemplateView):
+    login_url = '/login/'
+    template_name = 'admin/store/store_list.html'
+
+
+
+class CatagoryStoreListAdminView(TemplateView):
+    login_url = '/login/'
+    template_name = 'admin/store/store_catagory_list.html'
+
+
 
 # def UserListAdmin(request):
     # return render(request, 'admin/user/user_list.html')

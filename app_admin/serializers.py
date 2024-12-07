@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from hapi_app.models import User,Country,UserLV
+from store.models import Product,Category
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,4 +21,14 @@ class UserLVListSerializer(serializers.ModelSerializer):
         model = UserLV
         exclude = ['created_at']
 
+class StoreListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
 
+
+
+class CategoryStoreListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'

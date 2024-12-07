@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from hapi_app.models import User,Country,UserLV
-from .serializers import UserListSerializer,CountryListSerializer,UserLVListSerializer
+from .serializers import UserListSerializer,CategoryStoreListSerializer,CountryListSerializer,UserLVListSerializer,StoreListSerializer
 from .forms import UserAuthForm 
 from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from rest_framework import viewsets, status
+from store.models import Product,Category
 
 
 class LoginPageView(LoginView):
@@ -259,9 +260,84 @@ class UserLVListView(APIView):
 
 
 
+class AllStoreViewList(APIView):
+    # permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination
+
+    def get(self, request, *args, **kwargs):
+        queryset = Product.objects.filter(is_active=True).order_by('id')
+
+        # 'q' parameter used to filter title, category, and subcategory
+        query = request.query_params.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) |
+                Q(day__icontains=query) |
+                Q(star__icontains=query) |
+                Q(price__icontains=query) |
+                Q(category__name__icontains=query)
+            )
+
+        # Pagination settings
+        paginator = self.pagination_class()
+        page_size = int(request.query_params.get('size', 30))
+        paginator.page_size = page_size
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        if paginated_queryset:
+            serializer = StoreListSerializer(paginated_queryset, many=True)
+            return paginator.get_paginated_response({
+                "count_page": paginator.page.paginator.num_pages,
+                "current_page": paginator.page.number,
+                "size": paginator.page.paginator.per_page,
+                "data": serializer.data
+            })
+
+        return Response({
+            "count_page": 0,
+            "current_page": 1,
+            "size": page_size,
+            "data": []
+        }, status=status.HTTP_200_OK)
 
 
 
+class AllStoreCategoryViewList(APIView):
+    permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination
+
+    def get(self, request, *args, **kwargs):
+        queryset = Category.objects.filter(is_active=True).order_by('id')
+
+        # 'q' parameter used to filter title, category, and subcategory
+        query = request.query_params.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query)
+                
+            )
+
+        # Pagination settings
+        paginator = self.pagination_class()
+        page_size = int(request.query_params.get('size', 30))
+        paginator.page_size = page_size
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        if paginated_queryset:
+            serializer = CategoryStoreListSerializer(paginated_queryset, many=True)
+            return paginator.get_paginated_response({
+                "count_page": paginator.page.paginator.num_pages,
+                "current_page": paginator.page.number,
+                "size": paginator.page.paginator.per_page,
+                "data": serializer.data
+            })
+
+        return Response({
+            "count_page": 0,
+            "current_page": 1,
+            "size": page_size,
+            "data": []
+        }, status=status.HTTP_200_OK)
 
 
 
