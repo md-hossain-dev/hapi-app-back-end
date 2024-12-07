@@ -28,6 +28,10 @@ class User(AbstractUser):
         ('female', 'female'),
         ('others', 'others'),
     )
+    AUTH_CHOICES = (
+        ('google', 'google'),
+        ('facebook', 'facebook'),
+    )
     email = models.EmailField(unique=True, blank=False, null=False)  
     username = models.CharField(max_length=150, blank=True, null=True)
     profile = models.ImageField(upload_to='profile/', blank=True, null=True)
@@ -45,6 +49,13 @@ class User(AbstractUser):
     is_svip = models.BooleanField(default=False)
     country = models.ForeignKey(Country, on_delete=models.CASCADE,null=True,blank=True)
     level = models.ForeignKey(UserLV, related_name='level', on_delete=models.CASCADE,null=True,blank=True)
+
+    # google login
+    google_token = models.CharField(max_length=1000,blank=True, null=True)
+    unique_id = models.CharField(max_length=1000,blank=True, null=True)
+    auth_type = models.CharField(max_length=54, choices=AUTH_CHOICES,blank=True, null=True)
+    access_token_google = models.CharField(max_length=1000,blank=True, null=True)
+
 
     groups = models.ManyToManyField(
         'auth.Group',

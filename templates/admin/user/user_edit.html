@@ -1,0 +1,443 @@
+{% extends "base/admin_base.html" %}
+{% load static %}
+
+{% block title %}User Info{% endblock title %}
+
+{% block content %}
+<style type="text/css">
+    
+</style>
+
+<section class="content">
+    <div class="right_col" role="main">
+    <div class="">
+      
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>User Info <small>Edit your content</small></h2>
+              
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <form id="blogForm" class="form-horizontal form-label-centre">
+                <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+                    <!-- Email Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="email">Email <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="email" id="email" name="email" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- phone_number Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="phone_number">Phone Number <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="number" id="phone_number" name="phone_number" required="required" class="form-control">
+                      </div>
+                    </div>
+
+                    <br>
+                    <!-- username Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="username">Username <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="username" name="username" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- first_name Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first_name">First Name <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="first_name" name="first_name" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- last_name Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last_name">Last Name <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="last_name" name="last_name" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- bio Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bio">Bio <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="bio" name="bio" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- nick_name Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="Nick Name">nick_name <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="nick_name" name="nick_name" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    
+                    <!-- gender Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="gender">Gender</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="gender" name="gender" class="form-control">
+                                <option value="male" selected>Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <br>
+                    <!-- birth_day Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="birth_day">Birth Day</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="date" id="birth_day" name="birth_day" class="form-control">
+                        </div>
+                    </div>
+
+                    <br>
+                    <!-- Country Field -->
+                    
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="country">Country</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="country" name="country" class="form-control">
+                                <option value="">Select Country</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- level Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="level">Level</label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <select id="level" name="level" class="form-control">
+                          <option value="">Select Level</option>
+                        </select>
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- is_active Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="is_active">Active</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="is_active" name="is_active" class="form-control">
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+
+                    <!-- is_active Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="is_svip">SVIP</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="is_svip" name="is_svip" class="form-control">
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <br>
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="profile">Profile Image</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="file" id="profile" name="profile" class="form-control" accept="profile/*" onchange="previewImage(event)">
+                        </div>
+                    </div>
+
+                    <!-- Blog Image Preview Container -->
+                    <div id="imagePreviewContainer" class="col-md-12 col-sm-12 col-xs-12">
+                        <!-- The image preview will appear here -->
+                    </div>
+
+                   
+                    
+
+                   
+                    
+
+
+
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="ln_solid"></div>
+                <br>
+
+                <!-- Submit & Reset Buttons -->
+                <div class="form-group">
+                  <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                    <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                    <button type="reset" class="btn btn-primary">Reset</button>
+                  </div>
+                </div>
+              </form>
+
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+
+
+
+
+
+
+
+
+
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script type="text/javascript">
+    const urlParams = new URLSearchParams(window.location.search);
+    const idUser = urlParams.get('id_user');
+    console.log('idUser:', idUser);
+
+    if (idUser) {
+        axios.get(`http://127.0.0.1:8000/user-details/${idUser}/`)
+            .then(response => {
+                const user = response.data.user;
+                console.log("User data loaded:", user);
+
+                if (user) {
+                    document.getElementById('email').value = user.email || '';
+                    document.getElementById('username').value = user.username || '';
+                    document.getElementById('first_name').value = user.first_name || '';
+                    document.getElementById('last_name').value = user.last_name || '';
+                    document.getElementById('bio').value = user.bio || '';
+                    document.getElementById('nick_name').value = user.nick_name || '';
+                    document.getElementById('gender').value = user.gender || '';
+                    document.getElementById('birth_day').value = user.birth_day || '';
+                    document.getElementById('phone_number').value = user.phone_number || '';
+
+                    if (user.profile) {
+                        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                        imagePreviewContainer.innerHTML = ''; // Clear previous image preview
+
+                        const img = document.createElement('img');
+                        img.src = `http://127.0.0.1:8000${user.profile}`; // Full URL of the profile image
+                        img.alt = 'Profile Image';
+                        img.style.maxWidth = '200px'; // Optional: Set max width
+                        img.style.marginTop = '10px';
+                        imagePreviewContainer.appendChild(img);
+                    }
+
+                    document.getElementById('level').value = user.level || '';
+                    document.getElementById('country').value = user.country || '';
+                    document.getElementById('is_active').value = user.is_active ? 'True' : 'False';
+                    document.getElementById('is_svip').value = user.is_svip ? 'True' : 'False';
+
+                    loadCountry(user.country);
+                    loadLevel(user.level);
+                }
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    }
+
+    function loadCountry(selectedCountryId = null) {
+        console.log("loadCountry function is being called");
+        axios.get('http://127.0.0.1:8000/country-details/')
+            .then(response => {
+                console.log("Countries loaded:", response.data);
+                const countries = response.data;
+                const countrySelect = document.getElementById('country');
+
+                countrySelect.innerHTML = '<option value="">Select Country</option>';
+
+                countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.id;
+                    option.textContent = country.name;
+
+                    if (selectedCountryId && parseInt(selectedCountryId) === country.id) {
+                        option.selected = true;
+                    }
+
+                    countrySelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching countries:', error));
+    }
+
+    function loadLevel(selectedLevelId = null) {
+        console.log("loadLevel function is being called");
+        axios.get('http://127.0.0.1:8000/level-details/')
+            .then(response => {
+                console.log("Level loaded:", response.data);
+                const levels = response.data;
+                const levelSelect = document.getElementById('level');
+
+                levelSelect.innerHTML = '<option value="">Select Level</option>';
+
+                levels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level.id;
+                    option.textContent = level.level_name;
+
+                    if (selectedLevelId && parseInt(selectedLevelId) === level.id) {
+                        option.selected = true;
+                    }
+
+                    levelSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching levels:', error));
+    }
+
+    // Initialize the page by loading country and level data when the document is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Document loaded");
+        loadCountry();
+        loadLevel();
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        updateUser();
+    });
+
+
+    // Function to update the user data
+    function updateUser() {
+        const email = document.getElementById('email').value;
+        const username = document.getElementById('username').value;
+        const first_name = document.getElementById('first_name').value;
+        const last_name = document.getElementById('last_name').value;
+        const bio = document.getElementById('bio').value;
+        const nick_name = document.getElementById('nick_name').value;
+        const gender = document.getElementById('gender').value;
+        const birth_day = document.getElementById('birth_day').value;
+        const phone_number = document.getElementById('phone_number').value;
+        const is_active = document.getElementById('is_active').value;
+        const is_svip = document.getElementById('is_svip').value;
+        const level = document.getElementById('level').value;
+        const country = document.getElementById('country').value;
+        const UserImage = document.getElementById('profile').files[0];
+
+        // Create FormData object to append all data (including files)
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('username', username);
+        formData.append('first_name', first_name);
+        formData.append('last_name', last_name);
+        formData.append('bio', bio);
+        formData.append('nick_name', nick_name);
+        formData.append('gender', gender);
+        formData.append('birth_day', birth_day);
+        formData.append('phone_number', phone_number);
+        formData.append('is_active', is_active);
+        formData.append('is_svip', is_svip);
+        formData.append('level', level);
+        formData.append('country', country);
+
+        // Append the profile image if selected
+        if (UserImage) {
+            formData.append('profile', UserImage);
+        }
+
+        // Make API call to update user data
+        axios.put(`http://127.0.0.1:8000/user-update/${idUser}/`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            const data = response.data;  // Axios automatically parses the JSON
+              if (data.message) {
+                  // Show success message using Toastr
+                  toastr.success(data.message, 'Success');
+                  // $('#id_table_blog').DataTable().ajax.reload();
+                  // Optionally, remove the deleted user row from the UI
+              } else {
+                  // Show error message using Toastr
+                  toastr.error(data.error || "An error occurred!", 'Error');
+              }
+        })
+        .catch(error => {
+            if (error.response && error.response.data) {
+                const errorMessage = error.response.data.error || error.response.data.message || 'Error occurred while updating the user.';
+                alert(errorMessage);
+            } else {
+                alert('An unexpected error occurred.');
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+function previewImage(event) {
+    const file = event.target.files[0]; // Get the selected file
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+    // Clear previous preview
+    imagePreviewContainer.innerHTML = '';
+
+    if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result; // Set the image source to the file's data
+            img.alt = 'Preview Image';
+            img.style.maxWidth = '200px'; // Optional: Set max width
+            img.style.marginTop = '10px';
+            imagePreviewContainer.appendChild(img);
+        };
+
+        reader.readAsDataURL(file); // Read the file as a data URL
+    }
+}
+</script>
+
+
+
+<script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+{% endblock content %}

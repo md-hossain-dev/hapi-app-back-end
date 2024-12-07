@@ -17,6 +17,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/')
     day = models.PositiveIntegerField()
+    star = models.PositiveIntegerField(blank=True, null=True)
     price = models.PositiveIntegerField()  # Price in coins
     is_active = models.BooleanField(default=True)
 

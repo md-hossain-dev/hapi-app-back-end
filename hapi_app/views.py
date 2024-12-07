@@ -19,7 +19,9 @@ from .utils import send_firebase_notification
 from google.auth.transport.requests import Request
 
 from .models import Notification
-
+from django.db import transaction
+from django.core.files.base import ContentFile
+import requests
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
     
@@ -76,6 +78,106 @@ class CustomObtainTokenView(APIView):
             'message': 'Login failed: Invalid credentials or inactive user'
         }, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+
+class GoogleAuthAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        required_fields = ['google_token', 'unique_id', 'auth_type', 'access_token_google', 
+                           'password', 'email', 'nick_name', 'profile_image_url']
+        data = request.data
+
+        # Validate required fields
+        if not all(field in data and data[field] for field in required_fields):
+            return Response({'message': 'All fields are required.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        google_token = data.get('google_token')
+        unique_id = data.get('unique_id')
+        auth_type = data.get('auth_type')
+        access_token_google = data.get('access_token_google')
+        password = data.get('password')
+        email = data.get('email')
+        nick_name = data.get('nick_name')
+        profile_image_url = data.get('profile_image_url')
+
+        try:
+            # Check if user already exists
+            user = User.objects.filter(email=email).first()
+
+            if user:
+                # User exists, check password
+                if not user.check_password(password):
+                    return Response({'message': 'Invalid password.'}, 
+                                    status=status.HTTP_401_UNAUTHORIZED)
+
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'message': 'Login successful',
+                    'user_id': user.id,
+                    'email': user.email,
+                    'nick_name': user.first_name,
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                }, status=status.HTTP_200_OK)
+            else:
+                # Create a new user
+                user = User(
+                    google_token=google_token,
+                    unique_id=unique_id,
+                    auth_type=auth_type,
+                    access_token_google=access_token_google,
+                    password=password,
+                    email=email,
+                    nick_name=nick_name
+                )
+                user.set_password(password)
+                
+                # Save user to generate primary key
+                user.save()
+
+                # Download and save profile image
+                if profile_image_url:
+
+                    try:
+                        response = requests.get(profile_image_url, stream=True)
+                        if response.status_code == 200:
+                            # Extract the filename from the URL or use a custom name
+                            filename = f"{unique_id}_profile.jpg"
+                            
+                            # Save the image to the profile field
+                            user.profile.save(filename, ContentFile(response.content), save=True)
+                        else:
+                            return Response({
+                                'message': 'Failed to download image from the provided URL.',
+                                'status_code': response.status_code
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    except requests.exceptions.RequestException as e:
+                        return Response({
+                            'message': 'Error occurred while downloading the profile image.',
+                            'error': str(e)
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'message': 'User created and logged in successfully',
+                    'user_id': user.id,
+                    'email': user.email,
+                    'nick_name': user.nick_name,
+                    'profile_image': user.profile.url if user.profile else None,
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'message': 'Something went wrong', 'error': str(e)}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # class CustomObtainTokenView(APIView):
@@ -283,17 +385,50 @@ class FollowUserAPIView(APIView):
 
 
 
+# class UserWithFollowersCountAPIView(APIView):
+#     permission_classes = [AllowAny]
+#     def get(self, request, user_id, *args, **kwargs):
+#         try:
+#             user = User.objects.get(id=user_id)
+
+
+#             followers_count = user.followers.count()
+#             following_count = user.following.count()
+#             visitor_count = UserProfileVisit.objects.get(user=user)
+            
+
+#             data = {
+#                 'user': {
+#                     'id': user.id,
+#                     'username': user.username,
+#                 },
+#                 'followers_count': followers_count,
+#                 'following_count': following_count,
+#                 'visitor_count': visitor_count.visit_count
+#             }
+#             return Response(data, status=status.HTTP_200_OK)
+
+#         except User.DoesNotExist:
+#             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class UserWithFollowersCountAPIView(APIView):
     permission_classes = [AllowAny]
+
     def get(self, request, user_id, *args, **kwargs):
         try:
             user = User.objects.get(id=user_id)
 
+            with transaction.atomic():
+                if not hasattr(user, 'followers'):
+                    user.followers.create()  
+                if not hasattr(user, 'following'):
+                    user.following.create()
+
+            user_profile_visit, created = UserProfileVisit.objects.get_or_create(user=user, defaults={'visit_count': 0})
 
             followers_count = user.followers.count()
             following_count = user.following.count()
-            visitor_count = UserProfileVisit.objects.get(user=user)
-            
 
             data = {
                 'user': {
@@ -302,13 +437,13 @@ class UserWithFollowersCountAPIView(APIView):
                 },
                 'followers_count': followers_count,
                 'following_count': following_count,
-                'visitor_count': visitor_count.visit_count
+                'visitor_count': user_profile_visit.visit_count
             }
+
             return Response(data, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 class ProfileVisitCountAPIView(APIView):

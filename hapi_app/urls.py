@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import CustomObtainTokenView,UserWalletCountAPIView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
+from .views import CustomObtainTokenView,GoogleAuthAPIView,UserWalletCountAPIView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
 
 urlpatterns = [
     path('login/', CustomObtainTokenView.as_view(), name='login'),
+    path('login-with-google/', GoogleAuthAPIView.as_view(), name='login-with-google'),
     path('register/', CustomRegisterUserView.as_view(), name='custom_user_register'),
     path('follower/<int:user_id>/', FollowUserAPIView.as_view(), name='follow_user'),
     path('followers-count/<int:user_id>/', UserWithFollowersCountAPIView.as_view(), name='user_with_followers'),

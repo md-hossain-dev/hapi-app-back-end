@@ -26,7 +26,7 @@
         <div class="nav-left">
             <div class="icon-and-log">
                 <span class="icon" onclick="toggleNav()"></span>
-                <img src="https://images.ctfassets.net/xz1dnu24egyd/2Ix8kvOZiPx3ZX9L3mb5Vy/99a2f84c5f82e86cf8c397f4f7ce6535/gitlab-logo-400.png"
+                <img src="{% static 'logo/admin-logo.png' %}"
                     alt="Logo" class="logo">
             </div>
 
@@ -58,18 +58,11 @@
         <a href="{% url 'dashboard' %}"><i style="padding-right: 8px;" class="fa-solid fa-gauge"></i> Dashboard</a>
         <div class="links-box">
             <h2>NECESSARY</h2>
-            <a href="{% url 'reports' %}"><i style="padding-right: 8px;" class="fa-solid fa-circle-half-stroke"></i> Reports</a>
+            <a href="{% url 'user_list' %}"><i style="padding-right: 8px;" class="fa-solid fa-user"></i> User Info</a>
+            
             <a href="{% url 'payments' %}"><i style="padding-right: 8px;" class="fa-solid fa-coins"></i> Payment</a>
         </div>
-        <div class="links-box">
-            <h2>SOURCE OR REVENUE</h2>
-            <a href="{% url 'referral_system' %}"><i style="padding-right: 8px;" class="fa-brands fa-connectdevelop"></i>  Referral System</a>
-            <a href="{% url 'domain_apps' %}"><i style="padding-right: 8px;" class="fa-solid fa-earth-africa"></i>  Domain & Apps</a>
-        </div>
-        <div class="links-box">
-            <h2>SUPPORT</h2>
-            <a href="{% url 'help_center' %}"><i style="padding-right: 8px;" class="fa-brands fa-hire-a-helper"></i>  Help Center</a>
-        </div>
+        
     </div>
 
     <script>

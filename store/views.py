@@ -87,23 +87,25 @@ class ProductUpdateAPIView(APIView):
 
 
 
-class ProductListAPIView(APIView):
+class CategoryWithProductsAPIView(APIView):
     permission_classes = [AllowAny]
-    def get(self, request):
+    def get(self, request, category_id):
         
-        category_id = request.query_params.get('category', None)
-        
-        if category_id:
-            products = Product.objects.filter(category_id=category_id,is_active=True)
-        else:
-            products = Product.objects.all()
+        category = Category.objects.filter(id=category_id, is_active=True).first()
+        if not category:
+            return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        products = Product.objects.filter(category=category, is_active=True)
+
+        if not products.exists():
+            return Response({"detail": "No active products found in this category."}, status=status.HTTP_404_NOT_FOUND)
 
         paginator = CustomPagination()
         paginated_products = paginator.paginate_queryset(products, request)
-        
-        serializer = ProductCategorySerializer(paginated_products, many=True)
 
-        return paginator.get_paginated_response(serializer.data)
+        product_serializer = ProductSerializer(paginated_products, many=True)
+
+        return paginator.get_paginated_response(product_serializer.data)
 
 
 

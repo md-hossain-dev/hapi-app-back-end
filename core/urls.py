@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/', include('c_p.urls')),
     path('api/', include('family.urls')),
     path('api/', include('medal.urls')),
+    path('api/', include('walletusers.urls')),
 
 ]
 if settings.DEBUG:
