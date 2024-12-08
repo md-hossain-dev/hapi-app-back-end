@@ -34,6 +34,19 @@ class StoreListAdminView(TemplateView):
     template_name = 'admin/store/store_list.html'
 
 
+class StoreEditView(TemplateView):
+    template_name = 'admin/store/store_edit.html'
+    login_url = '/login/'
+
+    def get(self,request,*args, **kwargs):
+        return super().get(self,request,*args, **kwargs)
+
+    def get_context_data(self,*args, **kwargs):
+        kwargs['id_store'] = self.request.GET['id_store']
+        context = super().get_context_data(*args, **kwargs)
+        return context  
+
+
 
 class CatagoryStoreListAdminView(TemplateView):
     login_url = '/login/'

@@ -32,3 +32,16 @@ class CategoryStoreListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        # Pass the entire `category` instance to the serializer
+        response['category'] = CategoryStoreListSerializer(instance.category).data
+        return response

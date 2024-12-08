@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from hapi_app.models import User,Country,UserLV
-from .serializers import UserListSerializer,CategoryStoreListSerializer,CountryListSerializer,UserLVListSerializer,StoreListSerializer
+from .serializers import UserListSerializer,ProductUpdateSerializer,CategoryStoreListSerializer,CountryListSerializer,UserLVListSerializer,StoreListSerializer
 from .forms import UserAuthForm 
 from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
@@ -342,12 +342,115 @@ class AllStoreCategoryViewList(APIView):
 
 
 
+class ProductRetrieveAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            product = Product.objects.get(pk=pk)  
+            serializer = ProductUpdateSerializer(product)  
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return Response(
+                {"detail": "Product not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 
+class ProductDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    # permission_classes = [AllowAny]
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            product = Product.objects.get(pk=pk)
+            product.is_active = False
+            product.save()
+
+            return Response({"message": "Store Product deleted successfully"}, status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return Response({"error": "Store Product not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 
+class StoreUpdateAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def put(self, request, pk=None):
+        # Fetch the user instance
+        store_instance = Product.objects.filter(pk=pk, is_active=True).first()
+
+        if not store_instance:
+            return Response(
+                {"error": True, "message": "Store Product not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        
+        # Update level
+        category_id = request.data.get("category")
+        if category_id:
+            try:
+                category_instance = get_object_or_404(Category, pk=category_id)
+                store_instance.category = category_instance
+            except:
+                return Response(
+                    {"error": True, "message": f"Invalid category ID: {level_id}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Handle profile image upload
+        image = request.FILES.get("image")
+        if image:
+            store_instance.image = image
+
+        # Update other fields
+        update_data = {
+            "name": request.data.get("name", store_instance.name),
+            "description": request.data.get("description", store_instance.description),
+            "day": request.data.get("day", store_instance.day),
+            "star": request.data.get("star", store_instance.star),
+            "price": request.data.get("price", store_instance.price),
+            "is_active": request.data.get("is_active", store_instance.is_active),
+        }
+
+        for field, value in update_data.items():
+            setattr(store_instance, field, value)
+
+        store_instance.save()
+
+        # Serialize and return the response
+        serializer = StoreListSerializer(store_instance)
+        response_data = {
+            "error": False,
+            "message": "Store updated successfully",
+            "data": serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 
+class CategorytListStoreView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    def get(self, request):
+        country = Category.objects.all()
+        serializer = CategoryStoreListSerializer(country, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class StoreDetailView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        # Get the user instance or raise a 404 if not found
+        store_instance = get_object_or_404(Product, id=pk, is_active=True)
+        store_data = StoreListSerializer(store_instance).data
+        
+        response_data = {
+            "store": store_data,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)

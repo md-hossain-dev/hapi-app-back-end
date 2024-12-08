@@ -10,10 +10,10 @@ from django.views.generic import TemplateView
 from django.urls import path
 from . import views
 
-from app_admin.admin_views import LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,UserDetailView,UserDeleteView
+from app_admin.admin_views import ProductRetrieveAPIView,CategorytListStoreView,ProductDeleteAPIView,StoreUpdateAPIView,LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,StoreDetailView,UserDetailView,UserDeleteView
 from app_admin.security_views import TokenObtainPairView, TokenRefreshView,UserIdView
 
-from app_admin.views import UserListAdminView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
+from app_admin.views import UserListAdminView,StoreEditView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
 
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     path('user-update/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
     path('delete-user/<int:user_id>/', UserDeleteView.as_view(), name='delete-user'),
     path('user-details/<int:pk>/', UserDetailView.as_view(), name='delete_details'),
+    
 
     path('store-lists/', AllStoreViewList.as_view(), name='store_lists'),
     path('category-lists-store/', AllStoreCategoryViewList.as_view(), name='category_lists_store'),
@@ -30,6 +31,9 @@ urlpatterns = [
 
     path('country-details/', CountryListView.as_view(), name='country_details'),
     path('level-details/', UserLVListView.as_view(), name='level_details'),
+    # path('store-details/', ProductListStoreView.as_view(), name='store_details'),
+    path('category-details/', CategorytListStoreView.as_view(), name='category_details'),
+
     
     path('login/', LoginPageView.as_view(), name='login_users'), 
     path('logout/', LogoutView.as_view(), name='logout'), 
@@ -43,7 +47,13 @@ urlpatterns = [
     path('user-list/', UserListAdminView.as_view(), name='user_list'), 
     path('user-edit/', UserEditView.as_view(), name='user_edit'),
 
-    path('store-list/', StoreListAdminView.as_view(), name='store_list'), 
+    path('store-edit/', StoreEditView.as_view(), name='store_edit'),
+
+    path('store-list/', StoreListAdminView.as_view(), name='store_list'),
+    path('product/<int:pk>/', ProductRetrieveAPIView.as_view(), name='product-retrieve'),
+    path('store/delete/<int:pk>/', ProductDeleteAPIView.as_view(), name='product-delete'),
+    path('store-update/<int:pk>/', StoreUpdateAPIView.as_view(), name='store-update'),
+    path('store-info/<int:pk>/', StoreDetailView.as_view(), name='store_info'),
     path('catagory-list/', CatagoryStoreListAdminView.as_view(), name='catagory_list'), 
 
     # path('user-list/', views.UserListAdmin, name='user_list'),

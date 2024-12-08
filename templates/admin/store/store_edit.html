@@ -1,0 +1,338 @@
+{% extends "base/admin_base.html" %}
+{% load static %}
+
+{% block title %}User Info{% endblock title %}
+
+{% block content %}
+<style type="text/css">
+    
+</style>
+
+<section class="content">
+    <div class="right_col" role="main">
+    <div class="">
+      
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>User Info <small>Edit your content</small></h2>
+              
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <form id="blogForm" class="form-horizontal form-label-centre">
+                <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+
+                    <!-- name Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Name <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="name" id="name" name="name" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- description Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="description">Description <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="description" name="description" required="required" class="form-control">
+                      </div>
+                    </div>
+
+                    <br>
+                    <!-- day Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="day">Day <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="day" name="day" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- star Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="star">Star <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="text" id="star" name="star" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    <!-- price Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="price">Price <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="number" id="price" name="price" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    
+                    <br>
+                    <!-- Country Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="category">Category</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="category" name="category" class="form-control">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <br>
+
+                    <!-- is_active Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="is_active">Active</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="is_active" name="is_active" class="form-control">
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+
+
+                    <br>
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="image">Product Image</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <input type="file" id="image" name="image" class="form-control" accept="image/*" onchange="previewImage(event)">
+                        </div>
+                    </div>
+
+                    <!-- Blog Image Preview Container -->
+                    <div id="imagePreviewContainer" class="col-md-12 col-sm-12 col-xs-12">
+                        <!-- The image preview will appear here -->
+                    </div>
+
+                   
+
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="ln_solid"></div>
+                <br>
+
+                <!-- Submit & Reset Buttons -->
+                <div class="form-group">
+                  <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                    <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                    <button type="reset" class="btn btn-primary">Reset</button>
+                  </div>
+                </div>
+              </form>
+
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+
+
+
+
+
+
+
+
+
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script type="text/javascript">
+    const urlParams = new URLSearchParams(window.location.search);
+    const idStore = urlParams.get('id_store');
+    console.log('idStore:', idStore);
+
+    if (idStore) {
+        axios.get(`http://127.0.0.1:8000/store-info/${idStore}/`)
+            .then(response => {
+                const store = response.data.store;
+                console.log("store data loaded:", store);
+
+                if (store) {
+                    document.getElementById('name').value = store.name || '';
+                    document.getElementById('description').value = store.description || '';
+                    document.getElementById('day').value = store.day || '';
+                    document.getElementById('star').value = store.star || '';
+                    document.getElementById('price').value = store.price || '';
+
+                    if (store.image) {
+                        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                        imagePreviewContainer.innerHTML = ''; // Clear previous image preview
+
+                        const img = document.createElement('img');
+                        img.src = `http://127.0.0.1:8000${store.image}`; // Full URL of the profile image
+                        img.alt = 'Profile Image';
+                        img.style.maxWidth = '200px'; // Optional: Set max width
+                        img.style.marginTop = '10px';
+                        imagePreviewContainer.appendChild(img);
+                    }
+
+                    document.getElementById('category').value = store.category || '';
+                    document.getElementById('is_active').value = store.is_active ? 'True' : 'False';
+
+                    loadCategory(store.category);
+
+                }
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    }
+
+    function loadCategory(selectedCategoryId = null) {
+        console.log("loadCountry function is being called");
+        axios.get('http://127.0.0.1:8000/category-details/')
+            .then(response => {
+                console.log("category loaded:", response.data);
+                const categoryes = response.data;
+                const categorySelect = document.getElementById('category');
+
+                categorySelect.innerHTML = '<option value="">Select Country</option>';
+
+                categoryes.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+
+                    if (selectedCategoryId && parseInt(selectedCategoryId) === category.id) {
+                        option.selected = true;
+                    }
+
+                    categorySelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching categoryes:', error));
+    }
+
+    
+
+    // Initialize the page by loading country and level data when the document is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Document loaded");
+        loadCategory();
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        updateUser();
+    });
+
+
+    // Function to update the user data
+    function updateUser() {
+        const name = document.getElementById('name').value;
+        const description = document.getElementById('description').value;
+        const day = document.getElementById('day').value;
+        const star = document.getElementById('star').value;
+        const price = document.getElementById('price').value;
+        const is_active = document.getElementById('is_active').value;
+        const category = document.getElementById('category').value;
+        const storeImage = document.getElementById('image').files[0];
+
+        // Create FormData object to append all data (including files)
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', description);
+        formData.append('day', day);
+        formData.append('star', star);
+        formData.append('price', price);
+        formData.append('category', category);
+        formData.append('is_active', is_active);
+
+
+        // Append the profile image if selected
+        if (storeImage) {
+            formData.append('image', storeImage);
+        }
+
+        // Make API call to update user data
+        axios.put(`http://127.0.0.1:8000/store-update/${idStore}/`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            const data = response.data;  // Axios automatically parses the JSON
+              if (data.message) {
+                  // Show success message using Toastr
+                  toastr.success(data.message, 'Success');
+                  // $('#id_table_blog').DataTable().ajax.reload();
+                  // Optionally, remove the deleted user row from the UI
+              } else {
+                  // Show error message using Toastr
+                  toastr.error(data.error || "An error occurred!", 'Error');
+              }
+        })
+        .catch(error => {
+            if (error.response && error.response.data) {
+                const errorMessage = error.response.data.error || error.response.data.message || 'Error occurred while updating the user.';
+                alert(errorMessage);
+            } else {
+                alert('An unexpected error occurred.');
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+function previewImage(event) {
+    const file = event.target.files[0]; // Get the selected file
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+    // Clear previous preview
+    imagePreviewContainer.innerHTML = '';
+
+    if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result; // Set the image source to the file's data
+            img.alt = 'Preview Image';
+            img.style.maxWidth = '200px'; // Optional: Set max width
+            img.style.marginTop = '10px';
+            imagePreviewContainer.appendChild(img);
+        };
+
+        reader.readAsDataURL(file); // Read the file as a data URL
+    }
+}
+</script>
+
+
+
+<script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+{% endblock content %}
