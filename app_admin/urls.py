@@ -10,10 +10,10 @@ from django.views.generic import TemplateView
 from django.urls import path
 from . import views
 
-from app_admin.admin_views import ProductRetrieveAPIView,CategorytListStoreView,ProductDeleteAPIView,StoreUpdateAPIView,LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,StoreDetailView,UserDetailView,UserDeleteView
+from app_admin.admin_views import CategoryDetailView,ProductCategoryDeleteAPIView,CategoryUpdateAPIView,ProductRetrieveAPIView,CategorytListStoreView,ProductDeleteAPIView,StoreUpdateAPIView,LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,StoreDetailView,UserDetailView,UserDeleteView
 from app_admin.security_views import TokenObtainPairView, TokenRefreshView,UserIdView
 
-from app_admin.views import UserListAdminView,StoreEditView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
+from app_admin.views import CatagoryEditView,UserListAdminView,StoreEditView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
 
 
 urlpatterns = [
@@ -48,6 +48,8 @@ urlpatterns = [
     path('user-edit/', UserEditView.as_view(), name='user_edit'),
 
     path('store-edit/', StoreEditView.as_view(), name='store_edit'),
+    path('catagory-edit/', CatagoryEditView.as_view(), name='catagory_edit'),
+
 
     path('store-list/', StoreListAdminView.as_view(), name='store_list'),
     path('product/<int:pk>/', ProductRetrieveAPIView.as_view(), name='product-retrieve'),
@@ -55,6 +57,10 @@ urlpatterns = [
     path('store-update/<int:pk>/', StoreUpdateAPIView.as_view(), name='store-update'),
     path('store-info/<int:pk>/', StoreDetailView.as_view(), name='store_info'),
     path('catagory-list/', CatagoryStoreListAdminView.as_view(), name='catagory_list'), 
+    path('catagory-update/<int:pk>/', CategoryUpdateAPIView.as_view(), name='catagory_update'), 
+    path('catagory-info/<int:pk>/', CategoryDetailView.as_view(), name='catagory_info'),
+    
+    path('catagory/delete/<int:pk>/', ProductCategoryDeleteAPIView.as_view(), name='catagory-delete'),
 
     # path('user-list/', views.UserListAdmin, name='user_list'),
 

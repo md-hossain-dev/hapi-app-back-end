@@ -53,6 +53,20 @@ class CatagoryStoreListAdminView(TemplateView):
     template_name = 'admin/store/store_catagory_list.html'
 
 
+class CatagoryEditView(TemplateView):
+    template_name = 'admin/store/catagory_edit.html'
+    login_url = '/login/'
+
+    def get(self,request,*args, **kwargs):
+        return super().get(self,request,*args, **kwargs)
+
+    def get_context_data(self,*args, **kwargs):
+        kwargs['id_catagory'] = self.request.GET['id_catagory']
+        context = super().get_context_data(*args, **kwargs)
+        return context  
+
+
+
 
 # def UserListAdmin(request):
     # return render(request, 'admin/user/user_list.html')

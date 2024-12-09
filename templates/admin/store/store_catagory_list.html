@@ -83,7 +83,7 @@
                 <!-- Close Button (×) Removed -->
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this user?
+                Are you sure you want to delete this catagory?
             </div>
             <div class="modal-footer">
                 <!-- No Button to Close Modal -->
@@ -120,9 +120,8 @@
 
 
 <script type="application/javascript">
-    // Function to delete user by userId
-    // Function to delete user by userId
-    function deleteUser(userId) {
+
+    function deleteCatagory(catagoryId) {
         // Show the confirmation modal
         $('#deleteConfirmationModal').modal('show');
 
@@ -130,7 +129,7 @@
         $('#confirmDeleteBtn').on('click', function() {
             const jwtToken = localStorage.getItem("jwtToken");
             // Proceed with the deletion after user clicks "Yes"
-            axios.delete(`http://127.0.0.1:8000/delete-user/${userId}/`, {
+            axios.delete(`http://127.0.0.1:8000/catagory/delete/${catagoryId}/`, {
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}", // CSRF Token
                     "Authorization": `Bearer ${jwtToken}` // JWT Token from localStorage
@@ -176,8 +175,8 @@
 
     
 
-    function singleUser(userId) {
-    if (userId == null) {
+    function singleCatagory(catagoryId) {
+    if (catagoryId == null) {
         console.error("Invalid user ID");
         return;
     }
@@ -187,7 +186,7 @@
 
     // Get the JWT token from localStorage
     const jwtToken = localStorage.getItem("jwtToken");
-    console.log("JWT Token inside singleUser: ", jwtToken);  // Check the token
+    console.log("JWT Token inside singleCatagory: ", jwtToken);  // Check the token
 
     // Check if token is present
     if (!jwtToken) {
@@ -197,32 +196,24 @@
     }
 
     // API call to fetch the user details
-    axios.put(`http://127.0.0.1:8000/user-update/${userId}/`, {
+    axios.put(`http://127.0.0.1:8000/catagory-update/${catagoryId}/`, {
         headers: {
             "X-CSRFToken": "{{ csrf_token }}",  // CSRF Token
             "Authorization": `Bearer ${jwtToken}`  // Attach JWT Token as Bearer token
         }
     })
     .then((result) => {
-        const user = result?.data?.data;
-        console.log("User details: ", user);  // Check if data is returned correctly
+        const catagory = result?.data?.data;
+        console.log("catagory details: ", catagory);  // Check if data is returned correctly
 
-        // Update modal content with user data
+        // Update modal content with catagory data
         $('#user_details_modal_data').append(` 
             <div class="model_data">
-                <h5 class="model_data_title"><b>Email: </b> ${user.email}</h5>
-                <div><b>User Name: </b> ${user.username}</div>
-                <div><b>First Name: </b> ${user.first_name}</div>
-                <div><b>Last Name: </b> ${user.last_name}</div>
-                <div><b>Bio: </b> ${user.bio}</div>
-                <div><b>Nick Name: </b> ${user.nick_name}</div>
-                <div><b>Gender: </b> ${user.gender}</div>
-                <div><b>Birth Day: </b> ${user.birth_day}</div>
-                <div><b>Phone Number: </b> ${user.phone_number}</div>
-                <div><b>Active: </b> ${user.is_active ? 'Yes' : 'No'}</div>
-                <div><b>Vip: </b> ${user.is_svip ? 'Yes' : 'No'}</div>
-                <div><b>Level: </b> ${user.level}</div>
-                <div><b>Country: </b> ${user.country}</div>
+                <h5 class="model_data_title"><b>Email: </b> ${catagory.name}</h5>
+                <div><b>Created At: </b> ${catagory.created_at}</div>
+                <div><b>Updated At: </b> ${catagory.updated_at}</div>
+                <div><b>Active: </b> ${catagory.is_active ? 'Yes' : 'No'}</div>
+
             </div>
         `);
 
@@ -231,8 +222,8 @@
         modal.show();
     })
     .catch((error) => {
-        toastr.error('Error fetching User information');
-        console.error('Error fetching User information:', error);
+        toastr.error('Error fetching catagory information');
+        console.error('Error fetching catagory information:', error);
     });
 }
 
@@ -274,15 +265,15 @@
                             d.updated_at || "",
                             d.is_active || "",
                             `<div class="td-container d-flex justify-content-around">
-                                <a class="btn btn-sm btn-primary" href="javascript:void(0)" onclick="singleUser(${d?.id})">
+                                <a class="btn btn-sm btn-primary" href="javascript:void(0)" onclick="singleCatagory(${d?.id})">
                                     <i class="fa fa-eye"></i>
                                 </a>
 
-                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteUser(${d?.id})">
+                                <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="deleteCatagory(${d?.id})">
                                     <i class="fa fa-trash"></i>
                                 </a>
 
-                                <a class="btn btn-sm btn-secondary" href="{% url 'user_edit' %}?id_user=${d.id}">
+                                <a class="btn btn-sm btn-secondary" href="{% url 'catagory_edit' %}?id_catagory=${d.id}">
                                   <i class="fa fa-edit"></i> 
                                 </a>
                             </div>`

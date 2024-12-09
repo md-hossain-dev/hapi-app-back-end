@@ -1,0 +1,164 @@
+{% extends "base/admin_base.html" %}
+{% load static %}
+
+{% block title %}Catagory Info{% endblock title %}
+
+{% block content %}
+<style type="text/css">
+    
+</style>
+
+<section class="content">
+    <div class="right_col" role="main">
+    <div class="">
+      
+
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Catagory Info <small>Edit your content</small></h2>
+              
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+              <form id="blogForm" class="form-horizontal form-label-centre">
+                <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-12 col-sm-12 col-xs-12">
+
+                    <!-- name Field -->
+                    <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">Name <span class="required">*</span></label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <input type="name" id="name" name="name" required="required" class="form-control">
+                      </div>
+                    </div>
+                    <br>
+
+                    
+                    <!-- is_active Field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="is_active">Active</label>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <select id="is_active" name="is_active" class="form-control">
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br>
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="ln_solid"></div>
+                <br>
+                <!-- Submit & Reset Buttons -->
+                <div class="form-group">
+                  <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                    <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                    <button type="reset" class="btn btn-primary">Reset</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<script type="text/javascript">
+    const urlParams = new URLSearchParams(window.location.search);
+    const idCatagory = urlParams.get('id_catagory');
+    console.log('idCatagory:', idCatagory);
+
+    if (idCatagory) {
+        axios.get(`http://127.0.0.1:8000/catagory-info/${idCatagory}/`)
+            .then(response => {
+                const category = response.data.category;
+                console.log("category data loaded:", category);
+
+                if (category) {
+                    document.getElementById('name').value = category.name || '';
+                    document.getElementById('is_active').value = category.is_active ? 'True' : 'False';
+
+                }
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    }
+
+
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        updateCategory();
+    });
+
+
+    // Function to update the user data
+    function updateCategory() {
+        const name = document.getElementById('name').value;
+        const is_active = document.getElementById('is_active').value;
+        
+        // Create FormData object to append all data (including files)
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('is_active', is_active);
+
+        // Make API call to update user data
+        axios.put(`http://127.0.0.1:8000/catagory-update/${idCatagory}/`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            const data = response.data;  // Axios automatically parses the JSON
+              if (data.message) {
+                  // Show success message using Toastr
+                  toastr.success(data.message, 'Success');
+                  // $('#id_table_blog').DataTable().ajax.reload();
+                  // Optionally, remove the deleted user row from the UI
+              } else {
+                  // Show error message using Toastr
+                  toastr.error(data.error || "An error occurred!", 'Error');
+              }
+        })
+        .catch(error => {
+            if (error.response && error.response.data) {
+                const errorMessage = error.response.data.error || error.response.data.message || 'Error occurred while updating the user.';
+                alert(errorMessage);
+            } else {
+                alert('An unexpected error occurred.');
+            }
+        });
+    }
+</script>
+
+
+<script src="{% static 'js/token_verify.js' %}?v={{ js_timestamp }}"></script>
+
+{% endblock content %}

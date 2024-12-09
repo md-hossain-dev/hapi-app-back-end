@@ -22,6 +22,8 @@ from .models import Notification
 from django.db import transaction
 from django.core.files.base import ContentFile
 import requests
+
+
 class CustomObtainTokenView(APIView):
     permission_classes = [AllowAny]
     
@@ -116,6 +118,10 @@ class GoogleAuthAPIView(APIView):
                 # Generate JWT tokens
                 refresh = RefreshToken.for_user(user)
 
+                custom_lifetime = timedelta(days=365)  
+                access_token = refresh.access_token
+                access_token.set_exp(lifetime=custom_lifetime)
+
                 return Response({
                     'message': 'Login successful',
                     'user_id': user.id,
@@ -164,6 +170,9 @@ class GoogleAuthAPIView(APIView):
 
                 # Generate JWT tokens
                 refresh = RefreshToken.for_user(user)
+                custom_lifetime = timedelta(days=365)  
+                access_token = refresh.access_token
+                access_token.set_exp(lifetime=custom_lifetime)
 
                 return Response({
                     'message': 'User created and logged in successfully',

@@ -454,3 +454,71 @@ class StoreDetailView(APIView):
             "store": store_data,
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+class CategoryUpdateAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def put(self, request, pk=None):
+        # Fetch the user instance
+        catagory_instance = Category.objects.filter(pk=pk, is_active=True).first()
+
+        if not catagory_instance:
+            return Response(
+                {"error": True, "message": "Category not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+        # Update other fields
+        update_data = {
+            "name": request.data.get("name", catagory_instance.name),
+        }
+
+        for field, value in update_data.items():
+            setattr(catagory_instance, field, value)
+
+        catagory_instance.save()
+
+        # Serialize and return the response
+        serializer = CategoryStoreListSerializer(catagory_instance)
+        response_data = {
+            "error": False,
+            "message": "Category updated successfully",
+            "data": serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+class ProductCategoryDeleteAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            category = Category.objects.get(pk=pk)
+            category.is_active = False
+            category.save()
+
+            return Response({"message": "Store Category deleted successfully"}, status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return Response({"error": "Store Category not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class CategoryDetailView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        # Get the user instance or raise a 404 if not found
+        category_instance = get_object_or_404(Category, id=pk, is_active=True)
+        category_data = CategoryStoreListSerializer(category_instance).data
+        
+        response_data = {
+            "category": category_data,
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
