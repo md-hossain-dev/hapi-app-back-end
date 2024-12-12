@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from .models import CreateFamily, FamilyMember,BonusLevel
-from .serializers import CreateFamilySerializer,CreateFamilyNEWSerializer, FamilyMemberSerializer
+from .serializers import CreateFamilyListWithMembarSerializer,FamilyMemberAllSerializer,CreateFamilySerializer,CreateFamilyNEWSerializer, FamilyMemberSerializer,UserLVAPPListSerializer
 from django.shortcuts import get_object_or_404
-from hapi_app.models import User,Wallet,WalletLog
+from hapi_app.models import User,Wallet,WalletLog,UserLV
 from django.utils.timezone import now, timedelta
 from .utils import calculate_family_contribution
 from django.db import models
@@ -15,6 +15,53 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+
+# class CreateFamilyAPIView(APIView):
+#     permission_classes = [AllowAny]
+#     # permission_classes = [IsAuthenticated]
+
+#     def post(self, request, *args, **kwargs):
+#         serializer = CreateFamilyNEWSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user_id = request.query_params.get("user_id")
+#             print('user_id', user_id)
+#             user = get_object_or_404(User, id=user_id)
+#             print('user', user)
+
+#             if CreateFamily.objects.filter(created_by=user).exists():
+# 	            return Response(
+# 	                {"error": f"User already Create Family"},
+# 	                status=status.HTTP_400_BAD_REQUEST
+# 	            )
+
+#             # created_by=request.get(user)
+
+#             # Check if user is VIP
+#             if user.is_svip:
+#                 serializer.save(created_by=user)
+#             else:
+#                 # Deduct coins for non-VIP users
+#                 if user.wallet.gold_coins >= 10000:
+#                     user.wallet.gold_coins -= 10000
+#                     user.save()
+#                     serializer.save(created_by=user)
+#                     WalletLog.objects.create(
+#                         user=user,
+#                         action='debit',
+#                         coins_amount=10000,
+#                         wallet_description="Create Family"
+#                     )
+#                 else:
+#                     return Response(
+#                         {"error": "Not enough coins to create a family."},
+#                         status=status.HTTP_400_BAD_REQUEST
+#                     )
+
+
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class CreateFamilyAPIView(APIView):
     permission_classes = [AllowAny]
@@ -29,22 +76,20 @@ class CreateFamilyAPIView(APIView):
             print('user', user)
 
             if CreateFamily.objects.filter(created_by=user).exists():
-	            return Response(
-	                {"error": f"User already Create Family"},
-	                status=status.HTTP_400_BAD_REQUEST
-	            )
-
-            # created_by=request.get(user)
+                return Response(
+                    {"error": f"User already Create Family"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # Check if user is VIP
             if user.is_svip:
-                serializer.save(created_by=user)
+                serializer.save(created_by=user, family_image=request.FILES.get('family_image'))
             else:
                 # Deduct coins for non-VIP users
                 if user.wallet.gold_coins >= 10000:
                     user.wallet.gold_coins -= 10000
                     user.save()
-                    serializer.save(created_by=user)
+                    serializer.save(created_by=user, family_image=request.FILES.get('family_image'))
                     WalletLog.objects.create(
                         user=user,
                         action='debit',
@@ -56,7 +101,6 @@ class CreateFamilyAPIView(APIView):
                         {"error": "Not enough coins to create a family."},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -342,9 +386,40 @@ class WeeklyBonusDistributionAPIView(APIView):
 
 
 
+# class WeeklyFamilyRankingAPIView(APIView):
+#     # permission_classes = [IsAuthenticated]
+#     permission_classes = [AllowAny] 
+#     def get(self, request, *args, **kwargs):
+#         # Get the start and end of the current week (from last Sunday to today)
+#         today = datetime.today()
+#         start_of_week = today - timedelta(days=today.weekday())  # Monday of the current week
+#         end_of_week = start_of_week + timedelta(days=7)  # Sunday of the current week
+
+#         # Filter families based on the current week's contribution
+#         families = CreateFamily.objects.annotate(
+#             total_contribution=Sum('members__contribution')
+#         ).filter(
+#             created_at__gte=start_of_week, created_at__lte=end_of_week
+#         ).order_by('-total_contribution')  # Sorting by total contribution in descending order
+
+#         # Prepare the data to return
+#         family_data = []
+#         for family in families:
+#             family_data.append({
+#                 'id': family.id,
+#                 # 'family_image': family.family_image,
+#                 'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
+#                 'family_name': family.name,
+#                 'total_contribution': family.total_contribution,
+#                 'created_at': family.created_at,
+#             })
+
+#         return Response(family_data, status=status.HTTP_200_OK)
+
 class WeeklyFamilyRankingAPIView(APIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny] 
+
     def get(self, request, *args, **kwargs):
         # Get the start and end of the current week (from last Sunday to today)
         today = datetime.today()
@@ -361,19 +436,31 @@ class WeeklyFamilyRankingAPIView(APIView):
         # Prepare the data to return
         family_data = []
         for family in families:
+            # Fetch top 5 members based on contribution
+            top_members = FamilyMember.objects.filter(family=family).order_by('-contribution')[:5]
+
+            # Collect member images
+            member_images = [
+                request.build_absolute_uri(member.user.profile.url) if member.user.profile else None
+                for member in top_members
+            ]
+
             family_data.append({
+                'id': family.id,
+                'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
                 'family_name': family.name,
                 'total_contribution': family.total_contribution,
                 'created_at': family.created_at,
+                'top_member_images': member_images,
             })
 
         return Response(family_data, status=status.HTTP_200_OK)
 
 
-
 class LastWeekFamilyRankingAPIView(APIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny] 
+
     def get(self, request, *args, **kwargs):
         # Get the start and end of the last week (from last Monday to last Sunday)
         today = datetime.today()
@@ -390,10 +477,111 @@ class LastWeekFamilyRankingAPIView(APIView):
         # Prepare the data to return
         family_data = []
         for family in families:
+            # Fetch top 5 members based on contribution
+            top_members = FamilyMember.objects.filter(family=family).order_by('-contribution')[:5]
+
+            # Collect member images
+            member_images = [
+                request.build_absolute_uri(member.user.profile_image.url) if member.user.profile_image else None
+                for member in top_members
+            ]
+
             family_data.append({
+                'id': family.id,
                 'family_name': family.name,
+                'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
                 'total_contribution': family.total_contribution,
                 'created_at': family.created_at,
+                'top_member_images': member_images,
             })
 
         return Response(family_data, status=status.HTTP_200_OK)
+
+
+# class LastWeekFamilyRankingAPIView(APIView):
+#     # permission_classes = [IsAuthenticated]
+#     permission_classes = [AllowAny] 
+#     def get(self, request, *args, **kwargs):
+#         # Get the start and end of the last week (from last Monday to last Sunday)
+#         today = datetime.today()
+#         start_of_last_week = today - timedelta(days=today.weekday() + 7)  # Last Monday
+#         end_of_last_week = start_of_last_week + timedelta(days=7)  # Last Sunday
+
+#         # Filter families based on the last week's contribution
+#         families = CreateFamily.objects.annotate(
+#             total_contribution=Sum('members__contribution')
+#         ).filter(
+#             created_at__gte=start_of_last_week, created_at__lte=end_of_last_week
+#         ).order_by('-total_contribution')  # Sorting by total contribution in descending order
+
+#         # Prepare the data to return
+#         family_data = []
+#         for family in families:
+#             family_data.append({
+#                 'id': family.id,
+#                 'family_name': family.name,
+#                 'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
+#                 'total_contribution': family.total_contribution,
+#                 'created_at': family.created_at,
+#             })
+
+#         return Response(family_data, status=status.HTTP_200_OK)
+
+
+
+class UserLVAPPListView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    def get(self, request):
+        level = UserLV.objects.all()
+        serializer = UserLVAPPListSerializer(level, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+class FamilyMembersAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def get(self, request, family_id, *args, **kwargs):
+        
+        # family = get_object_or_404(CreateFamily, id=family_id)
+        members = CreateFamily.objects.filter(id=family_id)
+        serializer = CreateFamilyListWithMembarSerializer(members, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class FamilyBonusLevelDetailAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  
+
+    def get(self, request, *args, **kwargs):
+
+        family_id = kwargs.get('family_id')
+        family = get_object_or_404(CreateFamily, id=family_id)
+
+
+        current_level = family.bonus_level
+
+
+        next_target = family.get_next_target_contribution()
+
+        response_data = {
+            'family_id': family.id,
+            'family_name': family.name,
+            'current_level': current_level,
+            'next_target_contribution': next_target,
+            'created_at': family.created_at,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+

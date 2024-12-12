@@ -10,10 +10,10 @@ from django.views.generic import TemplateView
 from django.urls import path
 from . import views
 
-from app_admin.admin_views import CategoryDetailView,ProductCategoryDeleteAPIView,CategoryUpdateAPIView,ProductRetrieveAPIView,CategorytListStoreView,ProductDeleteAPIView,StoreUpdateAPIView,LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,StoreDetailView,UserDetailView,UserDeleteView
+from app_admin.admin_views import WalletUpdateAPIView,AllWalletViewList,AllCreateFamilyViewList,CategoryDetailView,ProductCategoryDeleteAPIView,CategoryUpdateAPIView,ProductRetrieveAPIView,CategorytListStoreView,ProductDeleteAPIView,StoreUpdateAPIView,LoginPageView,LogoutView,UserLVListView,AllStoreCategoryViewList,AllStoreViewList,CountryListView,AllUserViewList,UserUpdateAPIView,StoreDetailView,UserDetailView,UserDeleteView
 from app_admin.security_views import TokenObtainPairView, TokenRefreshView,UserIdView
 
-from app_admin.views import CatagoryEditView,UserListAdminView,StoreEditView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
+from app_admin.views import UserWalletListAdminView,FamilyListAdminView,CatagoryEditView,UserListAdminView,StoreEditView,UserEditView,StoreListAdminView,CatagoryStoreListAdminView
 
 
 urlpatterns = [
@@ -26,6 +26,8 @@ urlpatterns = [
 
     path('store-lists/', AllStoreViewList.as_view(), name='store_lists'),
     path('category-lists-store/', AllStoreCategoryViewList.as_view(), name='category_lists_store'),
+    path('family-lists/', AllCreateFamilyViewList.as_view(), name='family_lists'),
+    path('wallet-lists/', AllWalletViewList.as_view(), name='wallet_lists'),
 
     
 
@@ -44,6 +46,8 @@ urlpatterns = [
 
     
 
+    path('user-wallet-list/', UserWalletListAdminView.as_view(), name='user_wallet_list'), 
+    path('family-list/', FamilyListAdminView.as_view(), name='family_list'), 
     path('user-list/', UserListAdminView.as_view(), name='user_list'), 
     path('user-edit/', UserEditView.as_view(), name='user_edit'),
 
@@ -59,7 +63,7 @@ urlpatterns = [
     path('catagory-list/', CatagoryStoreListAdminView.as_view(), name='catagory_list'), 
     path('catagory-update/<int:pk>/', CategoryUpdateAPIView.as_view(), name='catagory_update'), 
     path('catagory-info/<int:pk>/', CategoryDetailView.as_view(), name='catagory_info'),
-    
+    path('wallet-update/<int:pk>/', WalletUpdateAPIView.as_view(), name='wallet_update'),
     path('catagory/delete/<int:pk>/', ProductCategoryDeleteAPIView.as_view(), name='catagory-delete'),
 
     # path('user-list/', views.UserListAdmin, name='user_list'),

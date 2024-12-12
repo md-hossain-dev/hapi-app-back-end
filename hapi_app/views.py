@@ -916,3 +916,37 @@ class UserWalletCountAPIView(APIView):
             return Response({'message': 'Wallet not found for the user'}, status=status.HTTP_404_NOT_FOUND)
 
 
+
+
+class UpdateFCMTokenAPIView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        fcm_token = request.data.get("fcm_token")
+        
+        if not user_id or not fcm_token:
+            return Response(
+                {"error": "Both 'user_id' and 'fcm_token' are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = get_object_or_404(User, id=user_id)
+
+        user.fcm_token = fcm_token
+        user.save()
+
+        return Response(
+            {"message": "FCM token updated successfully."},
+            status=status.HTTP_200_OK
+        )
+
+
+
+
+
+
+
+
+
+
+

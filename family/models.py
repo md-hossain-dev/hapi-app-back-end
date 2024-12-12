@@ -16,11 +16,12 @@ class BonusLevel(models.Model):
 
 class CreateFamily(models.Model):
     MODE_CHOICES = (
-        ("leader/co-leader review", "Leader/Co-Leader Review"), 
-        ("join_freely", "Join Freely"),   
+        ("Leader/Co-Leader Review", "Leader/Co-Leader Review"), 
+        ("Join Freely", "Join Freely"),   
     ) 
 
     name = models.CharField(max_length=255, unique=True)
+    family_image = models.ImageField(upload_to='family_image/', blank=True, null=True)
     family_notification = models.CharField(max_length=254, null=True, blank=True)
     join_mode = models.CharField(max_length=54, choices=MODE_CHOICES, default="leader/co-leader review") 
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_families")
@@ -41,11 +42,18 @@ class CreateFamily(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
+    def get_next_target_contribution(self):
+        try:
+            next_level = BonusLevel.objects.get(level=self.bonus_level + 1)
+            return next_level.target_contribution
+        except BonusLevel.DoesNotExist:
+            return None
+
 
 class FamilyMember(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # User can only join one family
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  
     family = models.ForeignKey(CreateFamily, on_delete=models.CASCADE, related_name="members")
-    coins_contributed = models.PositiveIntegerField(default=0)  # Coins contributed by this member
+    coins_contributed = models.PositiveIntegerField(default=0)
     joined_at = models.DateTimeField(auto_now_add=True)
     is_join = models.BooleanField(default=False)
     contribution = models.BigIntegerField(default=0)

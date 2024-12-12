@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from hapi_app.models import User,Country,UserLV
-from .serializers import UserListSerializer,ProductUpdateSerializer,CategoryStoreListSerializer,CountryListSerializer,UserLVListSerializer,StoreListSerializer
+from hapi_app.models import User,Country,UserLV,Wallet
+from .serializers import UserWalletListSerializer,CreateFamilyListSerializer,UserListSerializer,ProductUpdateSerializer,CategoryStoreListSerializer,CountryListSerializer,UserLVListSerializer,StoreListSerializer
 from .forms import UserAuthForm 
 from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
@@ -21,6 +21,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets
 from rest_framework import viewsets, status
 from store.models import Product,Category
+from family.models import CreateFamily,BonusLevel,FamilyMember
 
 
 class LoginPageView(LoginView):
@@ -522,3 +523,165 @@ class CategoryDetailView(APIView):
             "category": category_data,
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+
+class AllCreateFamilyViewList(APIView):
+    permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination
+
+    def get(self, request, *args, **kwargs):
+        queryset = CreateFamily.objects.filter().order_by('id')
+
+        # 'q' parameter used to filter title, category, and subcategory
+        query = request.query_params.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query)
+                
+            )
+
+        # Pagination settings
+        paginator = self.pagination_class()
+        page_size = int(request.query_params.get('size', 30))
+        paginator.page_size = page_size
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        if paginated_queryset:
+            serializer = CreateFamilyListSerializer(paginated_queryset, many=True)
+            return paginator.get_paginated_response({
+                "count_page": paginator.page.paginator.num_pages,
+                "current_page": paginator.page.number,
+                "size": paginator.page.paginator.per_page,
+                "data": serializer.data
+            })
+
+        return Response({
+            "count_page": 0,
+            "current_page": 1,
+            "size": page_size,
+            "data": []
+        }, status=status.HTTP_200_OK)
+
+
+
+class AllWalletViewList(APIView):
+    permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination
+
+    def get(self, request, *args, **kwargs):
+        queryset = Wallet.objects.filter().order_by('id')
+
+        # 'q' parameter used to filter title, category, and subcategory
+        query = request.query_params.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(gold_coins__icontains=query) |
+                Q(diamond_coins__icontains=query) |
+                Q(user__email__icontains=query) |
+                Q(user__nick_name__icontains=query) |
+                Q(user__gender__icontains=query) |
+                Q(user__phone_number__icontains=query) |
+                Q(user__username__icontains=query)
+            )
+
+        # Pagination settings
+        paginator = self.pagination_class()
+        page_size = int(request.query_params.get('size', 30))
+        paginator.page_size = page_size
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        if paginated_queryset:
+            serializer = UserWalletListSerializer(paginated_queryset, many=True)
+            return paginator.get_paginated_response({
+                "count_page": paginator.page.paginator.num_pages,
+                "current_page": paginator.page.number,
+                "size": paginator.page.paginator.per_page,
+                "data": serializer.data
+            })
+
+        return Response({
+            "count_page": 0,
+            "current_page": 1,
+            "size": page_size,
+            "data": []
+        }, status=status.HTTP_200_OK)
+
+
+
+class WalletUpdateAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    def put(self, request, pk=None):
+        # Fetch the user instance
+        wallet_instance = Wallet.objects.filter(pk=pk).first()
+
+        if not wallet_instance:
+            return Response(
+                {"error": True, "message": "Wallet not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        
+        # Update level
+        user_id = request.data.get("user")
+        if user_id:
+            try:
+                category_instance = get_object_or_404(User, pk=user_id)
+                wallet_instance.user = category_instance
+            except:
+                return Response(
+                    {"error": True, "message": f"Invalid User ID: {user_id}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Update other fields
+        update_data = {
+            "gold_coins": request.data.get("gold_coins", wallet_instance.gold_coins),
+            "diamond_coins": request.data.get("diamond_coins", wallet_instance.diamond_coins),
+        }
+
+        for field, value in update_data.items():
+            setattr(wallet_instance, field, value)
+
+        wallet_instance.save()
+
+        # Serialize and return the response
+        serializer = UserWalletListSerializer(wallet_instance)
+        response_data = {
+            "error": False,
+            "message": "Wallet updated successfully",
+            "data": serializer.data
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+class UpdateGoldCoinsAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    def post(self, request, user_id):
+        try:
+            gold_coins = request.data.get('gold_coins')
+
+            if gold_coins is None:
+                return Response({'error': 'gold_coins parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            gold_coins = int(gold_coins)
+
+            wallet = get_object_or_404(Wallet, user_id=user_id)
+
+            wallet.gold_coins = gold_coins
+            wallet.save()
+
+            return Response({
+                'message': f'User {user_id} gold coins updated successfully!',
+                'gold_coins': wallet.gold_coins
+            }, status=status.HTTP_200_OK)
+
+        except ValueError:
+            return Response({'error': 'Invalid input for gold_coins. Must be an integer.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

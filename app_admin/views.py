@@ -68,6 +68,16 @@ class CatagoryEditView(TemplateView):
 
 
 
+
+class FamilyListAdminView(TemplateView):
+    login_url = '/login/'
+    template_name = 'admin/family/family_list.html'
+
+
+class UserWalletListAdminView(TemplateView):
+    login_url = '/login/'
+    template_name = 'admin/wallet/user_wallet_list.html'
+
 # def UserListAdmin(request):
     # return render(request, 'admin/user/user_list.html')
 

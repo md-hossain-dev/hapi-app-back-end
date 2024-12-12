@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CustomObtainTokenView,GoogleAuthAPIView,UserWalletCountAPIView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
+from .views import UpdateFCMTokenAPIView,CustomObtainTokenView,GoogleAuthAPIView,UserWalletCountAPIView,UserProfileImageUpdateAPIView,CountryListAPIView,UserUpdateAPIView,CreateOrUpdateWalletAPIView,CustomRegisterUserView,UploadMultipleImagesAPIView,GetCoinsAPIView,InviteStatusAPIView,SingleInviteStatusAPIView,AcceptInviteAPIView,SendInviteAPIView,ProfileVisitCountAPIView,FollowUserAPIView,UserWithFollowersCountAPIView
 
 urlpatterns = [
     path('login/', CustomObtainTokenView.as_view(), name='login'),
@@ -19,4 +19,5 @@ urlpatterns = [
     path('user-update/', UserUpdateAPIView.as_view(), name='user-update'),
     path('update-profile-image/', UserProfileImageUpdateAPIView.as_view(), name='update-profile-image'),
     path('user-wallet/', UserWalletCountAPIView.as_view(), name='user_wallet'),
+    path('update-fcm-token/', UpdateFCMTokenAPIView.as_view(), name='update-fcm-token'),
 ]
