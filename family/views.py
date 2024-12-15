@@ -4,9 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from .models import CreateFamily, FamilyMember,BonusLevel
-from .serializers import CreateFamilyListWithMembarSerializer,FamilyMemberAllSerializer,CreateFamilySerializer,CreateFamilyNEWSerializer, FamilyMemberSerializer,UserLVAPPListSerializer
+from .serializers import MyCreateFamilyListWithMembarSerializer,CreateFamilyListWithMembarSerializer,FamilyMemberAllSerializer,CreateFamilySerializer,CreateFamilyNEWSerializer, FamilyMemberSerializer,UserLVAPPListSerializer
 from django.shortcuts import get_object_or_404
-from hapi_app.models import User,Wallet,WalletLog,UserLV
+from hapi_app.models import User,Wallet,WalletLog,UserLV,Notification
 from django.utils.timezone import now, timedelta
 from .utils import calculate_family_contribution
 from django.db import models
@@ -15,6 +15,10 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+from hapi_app.utils import send_firebase_notification
+from google.auth.transport.requests import Request
+
+from hapi_app.models import Notification
 
 # class CreateFamilyAPIView(APIView):
 #     permission_classes = [AllowAny]
@@ -106,6 +110,65 @@ class CreateFamilyAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# class FamilyMemberAPIView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def post(self, request, *args, **kwargs):
+#         family_id = request.data.get("family_id")
+#         user_id = request.data.get("user_id")
+
+#         if not family_id or not user_id:
+#             return Response(
+#                 {"error": "Both 'family_id' and 'user_id' are required."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+
+#         user = get_object_or_404(User, id=user_id)
+#         family = get_object_or_404(CreateFamily, id=family_id)
+
+
+#         if FamilyMember.objects.filter(user=user).exists():
+#             return Response(
+#                 {"error": "You are already in a family."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         if family.members.count() >= 50:
+#             return Response(
+#                 {"error": "Family is full. Cannot join more members."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         family_min_level = family.level  
+#         print("family_min_level",family_min_level)
+#         user_level = user.level 
+#         print("user_level",user_level) 
+
+#         if not user_level or user_level.id < family_min_level.id:
+#             return Response(
+#                 {"error": f"You need to be at least level {family_min_level.level_name} to join this family."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         if user.country != family.created_by.country:
+#             return Response(
+#                 {"error": "You can only join families in your country."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         family_member = FamilyMember.objects.create(user=user, family=family)
+
+#         return Response(
+#             {
+#                 "message": f"You have successfully joined the family '{family.name}'.",
+#                 "family_member_id": family_member.id,
+#             },
+#             status=status.HTTP_201_CREATED
+#         )
+
+
+
 class FamilyMemberAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -119,10 +182,8 @@ class FamilyMemberAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
         user = get_object_or_404(User, id=user_id)
         family = get_object_or_404(CreateFamily, id=family_id)
-
 
         if FamilyMember.objects.filter(user=user).exists():
             return Response(
@@ -137,9 +198,9 @@ class FamilyMemberAPIView(APIView):
             )
 
         family_min_level = family.level  
-        print("family_min_level",family_min_level)
+        print("family_min_level", family_min_level)
         user_level = user.level 
-        print("user_level",user_level) 
+        print("user_level", user_level) 
 
         if not user_level or user_level.id < family_min_level.id:
             return Response(
@@ -153,7 +214,40 @@ class FamilyMemberAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Create family member
         family_member = FamilyMember.objects.create(user=user, family=family)
+
+        # Send notification
+        title = "New Family Member!"
+        body = f"{user.nick_name} has joined your family '{family.name}'."
+        
+        if family.created_by.fcm_token:
+            try:
+                notification_response = send_firebase_notification(
+                    family.created_by.fcm_token, title, body
+                )
+                print("Firebase Response:", notification_response)
+
+                # Save notification in the database
+                Notification.objects.create(
+                    user=family.created_by,
+                    title=title,
+                    message=body,
+                    notification_route='FamilyDetailsScreen',
+                    is_sent=True,
+                    family_image=f"http://127.0.0.1:8000/media/{family.family_image}",
+                    user2=user
+                )
+            except Exception as e:
+                print(f"Error sending notification: {e}")
+                Notification.objects.create(
+                    user=family.created_by,
+                    title="Notification Error",
+                    message="Could not send the notification.",
+                    is_sent=False,
+                    family_image=f"http://127.0.0.1:8000/media/{family.family_image}",
+                    user2=user
+                )
 
         return Response(
             {
@@ -165,8 +259,9 @@ class FamilyMemberAPIView(APIView):
 
 
 
+
+
 class ManageFamilyMemberAPIView(APIView):
-    # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]  
 
     def post(self, request, *args, **kwargs):
@@ -175,7 +270,6 @@ class ManageFamilyMemberAPIView(APIView):
         family_id = request.data.get("family_id")
         action = request.data.get("action") 
 
-
         if not all([user_id, family_id, action]):
             return Response(
                 {"error": "user_id, family_id, and action are required."},
@@ -183,8 +277,6 @@ class ManageFamilyMemberAPIView(APIView):
             )
 
         user = get_object_or_404(User, id=created_id)
-
-
         family = get_object_or_404(CreateFamily, id=family_id)
 
         if family.created_by != user:
@@ -193,13 +285,40 @@ class ManageFamilyMemberAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-
         family_member = get_object_or_404(FamilyMember, user__id=user_id, family=family)
 
         if action == "accept":
             # Accept the member
             family_member.is_join = True
             family_member.save()
+
+            # Notification details
+            title = "New Family Member!"
+            body = f"{family_member.user.nick_name} has joined your family '{family_member.family.name}'."
+
+            # Check if the family owner has an FCM token
+            if family_member.user.fcm_token:
+                try:
+                    # Send push notification via Firebase
+                    notification_response = send_firebase_notification(
+                        family_member.user.fcm_token, title, body
+                    )
+                    print("Firebase Response:", notification_response)
+
+                    # Save notification in the database
+                    Notification.objects.create(
+                        user=family_member.user,
+                        title=title,
+                        message=body,
+                        notification_route='FamilyDetailsScreen',
+                        is_sent=True,
+                        family_image=f"{family.family_image}",
+                        user2=family.created_by  # Optionally associate the notification with the member who joined
+                    )
+
+                except Exception as e:
+                    print(f"Error sending Firebase notification: {e}")
+
             return Response(
                 {"message": f"User {family_member.user.username} has been accepted into the family '{family.name}'."},
                 status=status.HTTP_200_OK
@@ -208,6 +327,33 @@ class ManageFamilyMemberAPIView(APIView):
         elif action == "decline":
             # Decline the member and delete their data
             family_member.delete()
+
+            # Send notification to the user that their membership has been declined
+            title = "Family Membership Declined"
+            body = f"Your request to join the family '{family.name}' has been declined."
+
+            if family_member.user.fcm_token:
+                try:
+                    # Send push notification via Firebase
+                    notification_response = send_firebase_notification(
+                        family_member.user.fcm_token, title, body
+                    )
+                    print("Firebase Response:", notification_response)
+
+                    # Save notification in the database
+                    Notification.objects.create(
+                        user=family_member.user,
+                        title=title,
+                        message=body,
+                        notification_route='FamilyDetailsScreen',
+                        is_sent=True,
+                        family_image=f"{family.family_image}",
+                        user2=family.created_by  # Optionally associate the notification with the declined member
+                    )
+
+                except Exception as e:
+                    print(f"Error sending Firebase notification: {e}")
+
             return Response(
                 {"message": f"User {user_id} has been declined and removed from the family '{family.name}'."},
                 status=status.HTTP_200_OK
@@ -218,6 +364,61 @@ class ManageFamilyMemberAPIView(APIView):
                 {"error": "Invalid action. Use 'accept' or 'decline'."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+# class ManageFamilyMemberAPIView(APIView):
+#     # permission_classes = [IsAuthenticated]
+#     permission_classes = [AllowAny]  
+
+#     def post(self, request, *args, **kwargs):
+#         user_id = request.data.get("user_id")
+#         created_id = request.data.get("created_id")
+#         family_id = request.data.get("family_id")
+#         action = request.data.get("action") 
+
+
+#         if not all([user_id, family_id, action]):
+#             return Response(
+#                 {"error": "user_id, family_id, and action are required."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         user = get_object_or_404(User, id=created_id)
+
+
+#         family = get_object_or_404(CreateFamily, id=family_id)
+
+#         if family.created_by != user:
+#             return Response(
+#                 {"error": "You are not the owner of this family."},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
+
+
+#         family_member = get_object_or_404(FamilyMember, user__id=user_id, family=family)
+
+#         if action == "accept":
+#             # Accept the member
+#             family_member.is_join = True
+#             family_member.save()
+#             return Response(
+#                 {"message": f"User {family_member.user.username} has been accepted into the family '{family.name}'."},
+#                 status=status.HTTP_200_OK
+#             )
+
+#         elif action == "decline":
+#             # Decline the member and delete their data
+#             family_member.delete()
+#             return Response(
+#                 {"message": f"User {user_id} has been declined and removed from the family '{family.name}'."},
+#                 status=status.HTTP_200_OK
+#             )
+
+#         else:
+#             return Response(
+#                 {"error": "Invalid action. Use 'accept' or 'decline'."},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
 
 
@@ -447,6 +648,7 @@ class WeeklyFamilyRankingAPIView(APIView):
 
             family_data.append({
                 'id': family.id,
+                'created_by': family.created_by.id,
                 'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
                 'family_name': family.name,
                 'total_contribution': family.total_contribution,
@@ -488,6 +690,7 @@ class LastWeekFamilyRankingAPIView(APIView):
 
             family_data.append({
                 'id': family.id,
+                'created_by': family.created_by.id,
                 'family_name': family.name,
                 'family_image': request.build_absolute_uri(family.family_image.url) if family.family_image else None,
                 'total_contribution': family.total_contribution,
@@ -579,9 +782,84 @@ class FamilyBonusLevelDetailAPIView(APIView):
 
 
 
+class GetPendingFamilyMembersAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        family_id = request.query_params.get("family_id")
+        created_by_id = request.query_params.get("created_by")  # created_by এর ID
+
+        if not family_id or not created_by_id:
+            return Response(
+                {"error": "family_id and created_by are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            family = CreateFamily.objects.get(id=family_id, created_by_id=created_by_id)
+            
+            pending_members = FamilyMember.objects.filter(family=family, is_join=False)
+
+            # Prepare the response data
+            members_data = [
+                {
+                    "created_by": family.created_by.id,
+                    "family_id": family.id,
+                    "user_id": member.user.id,
+                    "name": member.user.nick_name,
+                    'image': request.build_absolute_uri(member.user.profile.url) if member.user.profile else None,
+                    "level": member.user.level.level_name
+                }
+                for member in pending_members
+            ]
+
+            if not members_data:
+                return Response(
+                    {"message": "No pending join requests found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            return Response({"pending_members": members_data}, status=status.HTTP_200_OK)
+
+        except CreateFamily.DoesNotExist:
+            return Response(
+                {"error": "Family not found or you are not the creator of this family."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
 
+class MyFamilyMembersAPIView(APIView):
+    permission_classes = [AllowAny]
 
+    def get(self, request, created_by_id, *args, **kwargs):
+        # Check if the user exists with the given created_by_id
+        try:
+            user = User.objects.get(id=created_by_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found with the given created_by_id."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Check if the user has created any families
+        created_families = CreateFamily.objects.filter(created_by=user)
+        if created_families.exists():
+            serializer = MyCreateFamilyListWithMembarSerializer(created_families, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # If no families are created by the user, check if they are a family member
+        family_member = FamilyMember.objects.filter(user=user,is_join=True).first()
+        if family_member:
+            # Fetch the family of the member
+            family = family_member.family
+            serializer = MyCreateFamilyListWithMembarSerializer([family], many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # If neither condition is met, return an empty response
+        return Response(
+            {"message": "No family data found for this user."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
 
 

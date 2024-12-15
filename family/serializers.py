@@ -65,13 +65,13 @@ class CreateFamilyListWithMembarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CreateFamily
-        fields = ['id', 'name', 'family_notification', 'join_mode', 'contribution', 'family_image', 
+        fields = ['id', 'name', 'created_by','family_notification', 'join_mode', 'contribution', 'family_image', 
                   'created_at', 'level', 'total_membar_count']
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
         response['f_membar'] = FamilyMemberAllMembarSerializer(
-            FamilyMember.objects.filter(family=instance).order_by('-contribution'), many=True).data
+            FamilyMember.objects.filter(family=instance,is_join=True).order_by('-contribution'), many=True).data
         return response
 
     def get_total_membar_count(self, instance):
@@ -87,3 +87,51 @@ class FamilyMemberAllMembarSerializer(serializers.ModelSerializer):
                   'contribution', 'is_leader', 'reward']
 
 
+
+
+class MyCreateFamilyListWithMembarSerializer(serializers.ModelSerializer):
+    total_membar_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CreateFamily
+        fields = ['id', 'name','created_by', 'family_notification', 'join_mode', 'contribution', 'family_image', 
+                  'created_at', 'level', 'total_membar_count']
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['f_membar'] = FamilyMemberAllMembarSerializer(
+            FamilyMember.objects.filter(family=instance).order_by('-contribution'), many=True).data
+        return response
+
+    def get_total_membar_count(self, instance):
+        return FamilyMember.objects.filter(family=instance).count()
+
+
+class MyFamilyMemberAllMembarSerializer(serializers.ModelSerializer):
+    user = FamilyMemberUserSerializer() 
+
+    class Meta:
+        model = FamilyMember
+        fields = ['id', 'user', 'family', 'coins_contributed', 'joined_at', 'is_join', 
+                  'contribution', 'is_leader', 'reward']
+
+
+
+
+class MyCreateFamilyListWithMemberSerializer(serializers.ModelSerializer):
+    total_membar_count = serializers.SerializerMethodField()
+    created_by = serializers.StringRelatedField()
+
+    class Meta:
+        model = CreateFamily
+        fields = ['id', 'name', 'family_notification', 'join_mode', 'contribution', 
+                  'family_image', 'created_at', 'level', 'total_membar_count', 'created_by']
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['f_membar'] = FamilyMemberAllMembarSerializer(
+            FamilyMember.objects.filter(family=instance).order_by('-contribution'), many=True).data
+        return response
+
+    def get_total_membar_count(self, instance):
+        return FamilyMember.objects.filter(family=instance).count()

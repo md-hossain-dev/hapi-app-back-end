@@ -944,9 +944,64 @@ class UpdateFCMTokenAPIView(APIView):
 
 
 
+# class UserNotificationAPIView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def get(self, request, *args, **kwargs):
+#         user_id = request.query_params.get('user_id')
+#         if not user_id:
+#             return Response({'message': 'user_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             user = User.objects.get(id=user_id)
+#             user_notifications = Notification.objects.filter(user=user, is_sent=True).order_by('-id')
+
+#             if not user_notifications.exists():
+#                 return Response({'message': 'No notifications found for the user'}, status=status.HTTP_404_NOT_FOUND)
+
+#             notifications = [
+#                 {
+#                     'ID': notification.id,
+#                     'title': notification.title,
+#                     'notification_route': notification.notification_route,
+#                     'message': notification.message,
+#                     'sent_at': notification.sent_at,
+#                     'family_image': notification.family_image,
+#                 }
+#                 for notification in user_notifications
+#             ]
+
+#             return Response({'notifications': notifications}, status=status.HTTP_200_OK)
+
+#         except User.DoesNotExist:
+#             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class UserNotificationAPIView(APIView):
+    permission_classes = [AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'message': 'user_id parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            user = User.objects.get(id=user_id)
+            user_notifications = Notification.objects.filter(user=user, is_sent=True).order_by('-id')
 
+            notifications = [
+                {
+                    'ID': notification.id,
+                    'title': notification.title,
+                    'notification_route': notification.notification_route,
+                    'message': notification.message,
+                    'sent_at': notification.sent_at,
+                    'family_image': notification.family_image,
+                }
+                for notification in user_notifications
+            ]
 
+            return Response({'notifications': notifications}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import uuid
 
+
 class UserLV(models.Model):
     level_name = models.CharField(max_length=20, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -82,7 +83,10 @@ class User(AbstractUser):
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    family_image = models.URLField(null=True,blank=True)
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user2_notifications',null=True,blank=True)
     title = models.CharField(max_length=255)
+    notification_route = models.CharField(max_length=255,null=True,blank=True)
     message = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     is_sent = models.BooleanField(default=False)
