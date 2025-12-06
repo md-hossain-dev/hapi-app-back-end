@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-7$mpzma0evoe*7*hzmi8-u(g%h=yofpyuw4u-vr10%_iq%ts)9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*","hapi-app-back-end-1.onrender.com"]
 
 
 # Application definition
