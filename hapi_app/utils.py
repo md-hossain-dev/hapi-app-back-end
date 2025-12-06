@@ -33,7 +33,7 @@ def send_firebase_notification(fcm_token, title, body):
         'Content-Type': 'application/json',
     }
 
-    project_id = "habiba-e39ad"
+    project_id = "codecat-c3a10"
     
     response = requests.post(
         FIREBASE_API_URL.format(project_id=project_id),
